@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{% if request.LANGUAGE_CODE == 'en' %}Manage accounts · DormFix{% else %}จัดการบัญชี · DormFix{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="account-management-page">
+    <header class="dashboard-heading account-management-heading">
+        <div>
+            <span class="eyebrow">{% if request.LANGUAGE_CODE == 'en' %}SUPERVISOR CONSOLE{% else %}สำหรับผู้ดูแลหอพัก{% endif %}</span>
+            <h1>{% if request.LANGUAGE_CODE == 'en' %}Manage accounts{% else %}จัดการบัญชีผู้ใช้{% endif %}</h1>
+            <p>{% if request.LANGUAGE_CODE == 'en' %}Search accounts, update dormitory roles, and deactivate departed members without deleting their repair history.{% else %}ค้นหาบัญชี เปลี่ยนบทบาทผู้ดูแล และปิดใช้งานบัญชีที่พ้นสภาพ โดยไม่ลบประวัติการแจ้งซ่อม{% endif %}</p>
+        </div>
+        <a class="page-back-button" href="{% url 'dashboard' %}">
+            <span aria-hidden="true">←</span>{% if request.LANGUAGE_CODE == 'en' %}Back to dashboard{% else %}กลับแดชบอร์ด{% endif %}
+        </a>
+    </header>
+
+    <section class="member-stat-grid management-stat-grid" aria-label="{% if request.LANGUAGE_CODE == 'en' %}Account totals{% else %}สรุปจำนวนบัญชี{% endif %}">
+        <article class="member-stat member-stat-total"><span>{% if request.LANGUAGE_CODE == 'en' %}All accounts{% else %}บัญชีทั้งหมด{% endif %}</span><strong>{{ member_stats.total }}</strong></article>
+        <article class="member-stat member-stat-active"><span>{% if request.LANGUAGE_CODE == 'en' %}Active{% else %}กำลังใช้งาน{% endif %}</span><strong>{{ member_stats.active }}</strong></article>
+        <article class="member-stat member-stat-inactive"><span>{% if request.LANGUAGE_CODE == 'en' %}Deactivated{% else %}ปิดใช้งาน / พ้นสภาพ{% endif %}</span><strong>{{ member_stats.inactive }}</strong></article>
+        <article class="member-stat member-stat-roles">
+            <span>{% if request.LANGUAGE_CODE == 'en' %}Accounts by type{% else %}แยกตามประเภทบัญชี{% endif %}</span>
+            <div class="member-role-breakdown">
+                <div><span>{% if request.LANGUAGE_CODE == 'en' %}Residents{% else %}ผู้พักอาศัย{% endif %}</span><strong>{{ member_stats.residents }}</strong></div>
+                <div><span>{% if request.LANGUAGE_CODE == 'en' %}Supervisors{% else %}ผู้ดูแล{% endif %}</span><strong>{{ member_stats.supervisors }}</strong></div>
+                <div><span>{% if request.LANGUAGE_CODE == 'en' %}Admins{% else %}แอดมิน{% endif %}</span><strong>{{ member_stats.administrators }}</strong></div>
+            </div>
+        </article>
+    </section>
+
+    <section class="account-directory dashboard-card" aria-labelledby="account-directory-title">
+        <header class="dashboard-card-heading">
+            <div>
+                <h2 id="account-directory-title">{% if request.LANGUAGE_CODE == 'en' %}Account directory{% else %}รายชื่อบัญชี{% endif %}</h2>
+                <p>{% if request.LANGUAGE_CODE == 'en' %}Django administrator accounts are protected and can only be edited in Django Admin.{% else %}บัญชีแอดมิน Django ถูกป้องกันและแก้ไขได้จาก Django Admin เท่านั้น{% endif %}</p>
+            </div>
+            <a class="account-activity-link" href="{% url 'account_activity' %}">
+                <span aria-hidden="true">◷</span>{% if request.LANGUAGE_CODE == 'en' %}View account history{% else %}ดูประวัติการจัดการ{% endif %}
+            </a>
+        </header>
+
+        <form class="account-filters" method="get">
+            <label class="account-search">
+                <span>{% if request.LANGUAGE_CODE == 'en' %}Search{% else %}ค้นหา{% endif %}</span>
+                <input type="search" name="q" value="{{ search }}" placeholder="{% if request.LANGUAGE_CODE == 'en' %}Name, username, or email{% else %}ชื่อ ชื่อผู้ใช้ หรืออีเมล{% endif %}">
+            </label>
+            <label>
+                <span>{% if request.LANGUAGE_CODE == 'en' %}Role{% else %}บทบาท{% endif %}</span>
+                <select name="role">
+                    <option value="">{% if request.LANGUAGE_CODE == 'en' %}All roles{% else %}ทุกบทบาท{% endif %}</option>
+                    <option value="student"{% if role_filter == 'student' %} selected{% endif %}>{% if request.LANGUAGE_CODE == 'en' %}Residents{% else %}ผู้พักอาศัย{% endif %}</option>
+                    <option value="supervisor"{% if role_filter == 'supervisor' %} selected{% endif %}>{% if request.LANGUAGE_CODE == 'en' %}Supervisors{% else %}ผู้ดูแลหอพัก{% endif %}</option>
+                </select>
+            </label>
+            <label>
+                <span>{% if request.LANGUAGE_CODE == 'en' %}Status{% else %}สถานะ{% endif %}</span>
+                <select name="status">
+                    <option value="">{% if request.LANGUAGE_CODE == 'en' %}All statuses{% else %}ทุกสถานะ{% endif %}</option>
+                    <option value="active"{% if status_filter == 'active' %} selected{% endif %}>{% if request.LANGUAGE_CODE == 'en' %}Active{% else %}กำลังใช้งาน{% endif %}</option>
+                    <option value="inactive"{% if status_filter == 'inactive' %} selected{% endif %}>{% if request.LANGUAGE_CODE == 'en' %}Inactive{% else %}ปิดใช้งาน{% endif %}</option>
+                </select>
+            </label>
+            <button class="primary-button" type="submit">{% if request.LANGUAGE_CODE == 'en' %}Apply filters{% else %}ค้นหา{% endif %}</button>
+            {% if search or role_filter or status_filter %}<a class="secondary-button" href="{% url 'account_management' %}">{% if request.LANGUAGE_CODE == 'en' %}Clear{% else %}ล้างตัวกรอง{% endif %}</a>{% endif %}
+        </form>
+
+        <p class="account-result-count" role="status">
+            {% if request.LANGUAGE_CODE == 'en' %}{{ page_obj.paginator.count }} account{{ page_obj.paginator.count|pluralize }} found{% else %}พบบัญชี {{ page_obj.paginator.count }} บัญชี{% endif %}
+        </p>
+
+        <div class="resident-account-list">
+            {% for account in accounts %}
+            {% include 'accounts/_account_management_row.html' %}
+            {% empty %}
+            <p class="resident-account-empty">{% if request.LANGUAGE_CODE == 'en' %}No matching accounts found.{% else %}ไม่พบบัญชีที่ตรงกับเงื่อนไข{% endif %}</p>
+            {% endfor %}
+        </div>
+
+        {% if page_obj.paginator.num_pages > 1 %}
+        <nav class="account-pagination" aria-label="{% if request.LANGUAGE_CODE == 'en' %}Account pages{% else %}หน้ารายชื่อบัญชี{% endif %}">
+            {% if page_obj.has_previous %}<a href="?{{ filter_query }}{% if filter_query %}&amp;{% endif %}page={{ page_obj.previous_page_number }}">{% if request.LANGUAGE_CODE == 'en' %}Previous{% else %}ก่อนหน้า{% endif %}</a>{% else %}<span class="disabled">{% if request.LANGUAGE_CODE == 'en' %}Previous{% else %}ก่อนหน้า{% endif %}</span>{% endif %}
+            <span>{% if request.LANGUAGE_CODE == 'en' %}Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% else %}หน้า {{ page_obj.number }} จาก {{ page_obj.paginator.num_pages }}{% endif %}</span>
+            {% if page_obj.has_next %}<a href="?{{ filter_query }}{% if filter_query %}&amp;{% endif %}page={{ page_obj.next_page_number }}">{% if request.LANGUAGE_CODE == 'en' %}Next{% else %}ถัดไป{% endif %}</a>{% else %}<span class="disabled">{% if request.LANGUAGE_CODE == 'en' %}Next{% else %}ถัดไป{% endif %}</span>{% endif %}
+        </nav>
+        {% endif %}
+    </section>
+
+    <dialog class="account-confirm-dialog" data-account-confirm-dialog aria-labelledby="account-confirm-title" aria-describedby="account-confirm-message">
+        <span class="account-confirm-icon" aria-hidden="true">!</span>
+        <h2 id="account-confirm-title">{% if request.LANGUAGE_CODE == 'en' %}Deactivate this account?{% else %}ยืนยันปิดใช้งานบัญชี?{% endif %}</h2>
+        <p id="account-confirm-message" data-confirm-copy
+            data-prefix-th="ยืนยันปิดใช้งานบัญชี "
+            data-suffix-th=" หรือไม่? บัญชีจะเข้าสู่ระบบไม่ได้ แต่บัญชีและประวัติการแจ้งซ่อมจะยังคงอยู่ ไม่ถูกลบ"
+            data-prefix-en="Deactivate "
+            data-suffix-en="? This account will no longer be able to sign in, but its account data and repair history will be kept."></p>
+        <div class="account-confirm-actions">
+            <button class="dialog-cancel" type="button" data-cancel-deactivation>{% if request.LANGUAGE_CODE == 'en' %}Cancel{% else %}ยกเลิก{% endif %}</button>
+            <button class="dialog-confirm-delete" type="button" data-confirm-deactivation>{% if request.LANGUAGE_CODE == 'en' %}Deactivate account{% else %}ยืนยันปิดใช้งาน{% endif %}</button>
+        </div>
+    </dialog>
+</section>
+<script>
+    const accountConfirmDialog = document.querySelector('[data-account-confirm-dialog]');
+    const confirmCopy = accountConfirmDialog?.querySelector('[data-confirm-copy]');
+    let pendingDeactivationForm = null;
+
+    document.querySelectorAll('[data-confirm-deactivation-form]').forEach((form) => {
+        form.addEventListener('submit', (event) => {
+            if (form.dataset.confirmed === 'true') {
+                delete form.dataset.confirmed;
+                return;
+            }
+            event.preventDefault();
+            pendingDeactivationForm = form;
+            if (confirmCopy) {
+                const language = document.documentElement.lang === 'en' ? 'en' : 'th';
+                const languageSuffix = language === 'en' ? 'En' : 'Th';
+                confirmCopy.textContent = `${confirmCopy.dataset[`prefix${languageSuffix}`]}${form.dataset.accountName}${confirmCopy.dataset[`suffix${languageSuffix}`]}`;
+            }
+            accountConfirmDialog?.showModal();
+        });
+    });
+
+    document.querySelector('[data-cancel-deactivation]')?.addEventListener('click', () => {
+        pendingDeactivationForm = null;
+        accountConfirmDialog?.close();
+    });
+
+    document.querySelector('[data-confirm-deactivation]')?.addEventListener('click', () => {
+        if (!pendingDeactivationForm) return;
+        const form = pendingDeactivationForm;
+        pendingDeactivationForm = null;
+        form.dataset.confirmed = 'true';
+        accountConfirmDialog?.close();
+        form.requestSubmit();
+    });
+
+    accountConfirmDialog?.addEventListener('close', () => {
+        pendingDeactivationForm = null;
+    });
+</script>
+{% endblock %}

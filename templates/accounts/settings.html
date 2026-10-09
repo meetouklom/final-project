@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{% if request.LANGUAGE_CODE == 'en' %}Account settings · DormFix{% else %}ตั้งค่าบัญชี · DormFix{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="account-settings-page">
+    <a class="back-link detail-back-link" href="{% url 'dashboard' %}">
+        <span aria-hidden="true">←</span>{% if request.LANGUAGE_CODE == 'en' %}Back to dashboard{% else %}กลับแดชบอร์ด{% endif %}
+    </a>
+    <header class="account-settings-heading">
+        <span class="eyebrow">{% if request.LANGUAGE_CODE == 'en' %}YOUR ACCOUNT{% else %}บัญชีของคุณ{% endif %}</span>
+        <h1>{% if request.LANGUAGE_CODE == 'en' %}Account settings{% else %}ตั้งค่าบัญชี{% endif %}</h1>
+        <p>{% if request.LANGUAGE_CODE == 'en' %}Your account information and the details linked to your repair requests.{% else %}ตรวจสอบข้อมูลบัญชีและข้อมูลที่ใช้กับรายการแจ้งซ่อมของคุณ{% endif %}</p>
+    </header>
+
+    <article class="account-settings-card">
+        <header class="account-profile-header">
+            <span class="account-settings-avatar" aria-hidden="true">{{ request.user.get_full_name|default:request.user.username|slice:':1'|upper }}</span>
+            <div class="account-profile-copy">
+                <span class="account-profile-kicker">{% if request.LANGUAGE_CODE == 'en' %}PROFILE OVERVIEW{% else %}ข้อมูลโปรไฟล์{% endif %}</span>
+                <h2>{{ request.user.get_full_name|default:request.user.username }}</h2>
+                <span class="account-role-badge">
+                    <span class="account-role-dot" aria-hidden="true"></span>
+                    {% if request.user.is_supervisor %}{% if request.LANGUAGE_CODE == 'en' %}Dormitory supervisor{% else %}ผู้ดูแลหอพัก{% endif %}{% elif request.LANGUAGE_CODE == 'en' %}Resident{% else %}ผู้พักอาศัย{% endif %}
+                </span>
+            </div>
+            <span class="account-profile-mark" aria-hidden="true">✓</span>
+        </header>
+        <dl class="account-settings-details">
+            <div class="account-detail-tile">
+                <span class="account-detail-icon" aria-hidden="true">@</span>
+                <div>
+                    <dt>{% if request.LANGUAGE_CODE == 'en' %}Username{% else %}ชื่อผู้ใช้{% endif %}</dt>
+                    <dd>{{ request.user.username }}</dd>
+                </div>
+            </div>
+            <div class="account-detail-tile">
+                <span class="account-detail-icon" aria-hidden="true">✉</span>
+                <div>
+                <dt>{% if request.LANGUAGE_CODE == 'en' %}Email address{% else %}อีเมล{% endif %}</dt>
+                <dd>{{ request.user.email|default_if_none:''|default:'—' }}</dd>
+                </div>
+            </div>
+            <div class="account-detail-tile">
+                <span class="account-detail-icon" aria-hidden="true">⌂</span>
+                <div>
+                    <dt>{% if request.LANGUAGE_CODE == 'en' %}Room number{% else %}เลขห้อง{% endif %}</dt>
+                    <dd>{{ request.user.room_number|default:'—' }}</dd>
+                    {% if request.user.room_number and not request.user.is_supervisor %}
+                    <small>{% if request.LANGUAGE_CODE == 'en' %}Used automatically on repair requests{% else %}ระบบใช้เลขนี้อัตโนมัติเมื่อแจ้งซ่อม{% endif %}</small>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="account-detail-tile">
+                <span class="account-detail-icon" aria-hidden="true">◷</span>
+                <div>
+                    <dt>{% if request.LANGUAGE_CODE == 'en' %}Member since{% else %}สมาชิกตั้งแต่{% endif %}</dt>
+                    <dd>{{ request.user.date_joined|date:'d M Y' }}</dd>
+                </div>
+            </div>
+        </dl>
+        <footer class="account-settings-footer">
+            <span><span class="account-security-icon" aria-hidden="true">✓</span>{% if request.LANGUAGE_CODE == 'en' %}Your account details are private to you.{% else %}ข้อมูลบัญชีนี้แสดงให้คุณเห็นเท่านั้น{% endif %}</span>
+            <a href="{% url 'dashboard' %}">{% if request.LANGUAGE_CODE == 'en' %}View my requests{% else %}ดูรายการแจ้งซ่อม{% endif %}<span aria-hidden="true">→</span></a>
+        </footer>
+    </article>
+
+    <article class="account-danger-zone">
+        <span class="account-danger-icon" aria-hidden="true">!</span>
+        <div class="account-danger-copy">
+            <span class="detail-card-kicker">{% if request.LANGUAGE_CODE == 'en' %}DANGER ZONE{% else %}การดำเนินการที่มีผลถาวร{% endif %}</span>
+            <h2>{% if request.LANGUAGE_CODE == 'en' %}Delete account{% else %}ลบบัญชี{% endif %}</h2>
+            <p>{% if request.LANGUAGE_CODE == 'en' %}This permanently removes your account. You’ll need to confirm your password before continuing.{% else %}การลบบัญชีเป็นการถาวร และระบบจะให้ยืนยันรหัสผ่านก่อนดำเนินการ{% endif %}</p>
+        </div>
+        <a class="delete-repair-button" href="{% url 'delete_account' %}">{% if request.LANGUAGE_CODE == 'en' %}Review deletion{% else %}ตรวจสอบการลบบัญชี{% endif %}<span aria-hidden="true">→</span></a>
+    </article>
+</section>
+{% endblock %}

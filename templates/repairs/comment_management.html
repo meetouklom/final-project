@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{% if request.LANGUAGE_CODE == 'en' %}Comments · DormFix{% else %}ความคิดเห็น · DormFix{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="comment-management-page">
+    <header class="dashboard-heading">
+        <div>
+            <span class="eyebrow">{% if request.LANGUAGE_CODE == 'en' %}SUPERVISOR CONSOLE{% else %}สำหรับผู้ดูแลหอพัก{% endif %}</span>
+            <h1>{% if request.LANGUAGE_CODE == 'en' %}Comments & replies{% else %}ความคิดเห็นและการตอบกลับ{% endif %}</h1>
+            <p>{% if request.LANGUAGE_CODE == 'en' %}Review conversations across all repair requests and reply to residents in one place.{% else %}ติดตามบทสนทนาจากทุกรายการแจ้งซ่อม และตอบกลับผู้พักอาศัยได้จากหน้าเดียว{% endif %}</p>
+        </div>
+        <a class="page-back-button" href="{% url 'dashboard' %}">
+            <span aria-hidden="true">←</span>{% if request.LANGUAGE_CODE == 'en' %}Back to dashboard{% else %}กลับแดชบอร์ด{% endif %}
+        </a>
+    </header>
+
+    <section class="comment-inbox dashboard-card" aria-label="{% if request.LANGUAGE_CODE == 'en' %}Repair discussions{% else %}บทสนทนาในรายการแจ้งซ่อม{% endif %}">
+        <form class="comment-search-form" method="get">
+            <label for="comment-search">{% if request.LANGUAGE_CODE == 'en' %}Search conversations{% else %}ค้นหาบทสนทนา{% endif %}</label>
+            <div>
+                <input id="comment-search" type="search" name="q" value="{{ search }}" placeholder="{% if request.LANGUAGE_CODE == 'en' %}Repair, room, resident, or comment{% else %}หัวข้อแจ้งซ่อม ห้อง ผู้แจ้ง หรือข้อความ{% endif %}">
+                <button class="primary-button" type="submit">{% if request.LANGUAGE_CODE == 'en' %}Search{% else %}ค้นหา{% endif %}</button>
+                {% if search %}<a class="secondary-button" href="{% url 'comment_management' %}">{% if request.LANGUAGE_CODE == 'en' %}Clear{% else %}ล้าง{% endif %}</a>{% endif %}
+            </div>
+        </form>
+
+        <p class="comment-inbox-count" role="status">
+            {% if request.LANGUAGE_CODE == 'en' %}{{ page_obj.paginator.count }} conversation{{ page_obj.paginator.count|pluralize }}{% else %}{{ page_obj.paginator.count }} บทสนทนา{% endif %}
+        </p>
+
+        <div class="comment-discussion-list">
+            {% for discussion in discussions %}
+            <article class="comment-discussion" id="discussion-{{ discussion.pk }}">
+                <header class="comment-discussion-header">
+                    <div class="comment-discussion-title">
+                        <span class="comment-request-number">#{{ discussion.pk }} · {{ discussion.location }}</span>
+                        <h2><a href="{% url 'repair_detail' discussion.pk %}">{{ discussion.title }}</a></h2>
+                        <p>
+                            {% if request.LANGUAGE_CODE == 'en' %}Reported by{% else %}ผู้แจ้ง{% endif %}
+                            <strong>{{ discussion.reported_by.get_full_name|default:discussion.reported_by.username }}</strong>
+                            <span aria-hidden="true">·</span>
+                            {% if request.LANGUAGE_CODE == 'en' %}{{ discussion.comment_count }} comment{{ discussion.comment_count|pluralize }}{% else %}{{ discussion.comment_count }} ความคิดเห็น{% endif %}
+                        </p>
+                    </div>
+                    <span class="status status-{{ discussion.status }}">
+                        {% if request.LANGUAGE_CODE == 'en' %}{{ discussion.get_status_display }}{% else %}{% if discussion.status == 'received' %}รับแจ้งแล้ว{% elif discussion.status == 'in_progress' %}กำลังดำเนินการ{% elif discussion.status == 'waiting' %}รออะไหล่{% elif discussion.status == 'completed' %}เสร็จสิ้น{% else %}ยกเลิก{% endif %}{% endif %}
+                    </span>
+                </header>
+
+                <ol class="activity-list comment-thread">
+                    {% for comment in discussion.comments.all %}
+                    <li class="activity-item{% if comment.author.is_supervisor %} supervisor-comment{% endif %}">
+                        <span class="activity-avatar" aria-hidden="true">{{ comment.author.get_full_name|default:comment.author.username|slice:':1'|upper }}</span>
+                        <div class="activity-entry">
+                            <div class="activity-entry-heading">
+                                <strong>{{ comment.author.get_full_name|default:comment.author.username }}</strong>
+                                <span class="activity-author-role">{% if comment.author.is_supervisor %}{% if request.LANGUAGE_CODE == 'en' %}Supervisor{% else %}ผู้ดูแล{% endif %}{% else %}{% if request.LANGUAGE_CODE == 'en' %}Resident{% else %}ผู้พักอาศัย{% endif %}{% endif %}</span>
+                                <time datetime="{{ comment.created_at|date:'c' }}">{{ comment.created_at|date:"DATETIME_FORMAT" }}</time>
+                            </div>
+                            <p>{{ comment.body|linebreaksbr }}</p>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ol>
+
+                <form class="activity-form comment-reply-form" method="post" action="{% url 'comment_management_reply' discussion.pk %}">
+                    {% csrf_token %}
+                    <label class="activity-input-label" for="reply-{{ discussion.pk }}">{% if request.LANGUAGE_CODE == 'en' %}Reply to this conversation{% else %}เขียนข้อความตอบกลับ{% endif %}</label>
+                    <textarea id="reply-{{ discussion.pk }}" name="body" rows="3" maxlength="2000" required placeholder="{% if request.LANGUAGE_CODE == 'en' %}Write a helpful update for the resident…{% else %}เขียนคำตอบหรือแจ้งความคืบหน้าให้ผู้พักอาศัยทราบ…{% endif %}"></textarea>
+                    <div class="activity-form-footer">
+                        <span>{% if request.LANGUAGE_CODE == 'en' %}Your reply will be visible to the resident.{% else %}ผู้พักอาศัยจะเห็นข้อความตอบกลับนี้{% endif %}</span>
+                        <button class="primary-button" type="submit"><span aria-hidden="true">↗</span>{% if request.LANGUAGE_CODE == 'en' %}Send reply{% else %}ส่งคำตอบ{% endif %}</button>
+                    </div>
+                </form>
+            </article>
+            {% empty %}
+            <div class="comment-inbox-empty">
+                <span aria-hidden="true">☷</span>
+                <h2>{% if request.LANGUAGE_CODE == 'en' %}No conversations found{% else %}ยังไม่มีบทสนทนา{% endif %}</h2>
+                <p>{% if search %}{% if request.LANGUAGE_CODE == 'en' %}Try a different search term.{% else %}ลองค้นหาด้วยคำอื่น{% endif %}{% else %}{% if request.LANGUAGE_CODE == 'en' %}Comments on repair requests will appear here.{% else %}เมื่อมีความคิดเห็นในรายการแจ้งซ่อม บทสนทนาจะแสดงที่นี่{% endif %}{% endif %}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if page_obj.paginator.num_pages > 1 %}
+        <nav class="account-pagination" aria-label="{% if request.LANGUAGE_CODE == 'en' %}Conversation pages{% else %}หน้าบทสนทนา{% endif %}">
+            {% if page_obj.has_previous %}<a href="?{% if search %}q={{ search|urlencode }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">{% if request.LANGUAGE_CODE == 'en' %}Previous{% else %}ก่อนหน้า{% endif %}</a>{% else %}<span class="disabled">{% if request.LANGUAGE_CODE == 'en' %}Previous{% else %}ก่อนหน้า{% endif %}</span>{% endif %}
+            <span>{% if request.LANGUAGE_CODE == 'en' %}Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% else %}หน้า {{ page_obj.number }} จาก {{ page_obj.paginator.num_pages }}{% endif %}</span>
+            {% if page_obj.has_next %}<a href="?{% if search %}q={{ search|urlencode }}&amp;{% endif %}page={{ page_obj.next_page_number }}">{% if request.LANGUAGE_CODE == 'en' %}Next{% else %}ถัดไป{% endif %}</a>{% else %}<span class="disabled">{% if request.LANGUAGE_CODE == 'en' %}Next{% else %}ถัดไป{% endif %}</span>{% endif %}
+        </nav>
+        {% endif %}
+    </section>
+</section>
+{% endblock %}

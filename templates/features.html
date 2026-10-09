@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{% if request.LANGUAGE_CODE == 'en' %}Features · DormFix{% else %}ฟีเจอร์ · DormFix{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="features-page">
+  <header class="features-heading">
+    <span class="eyebrow">{% if request.LANGUAGE_CODE == 'en' %}WHAT YOU CAN DO{% else %}รู้จักความสามารถของ DormFix{% endif %}</span>
+    <h1>{% if request.LANGUAGE_CODE == 'en' %}Everything you need to manage dorm repairs.{% else %}ทุกเครื่องมือดูแลเรื่องแจ้งซ่อม ในที่เดียว{% endif %}</h1>
+    <p>{% if request.LANGUAGE_CODE == 'en' %}A simple, clear workflow that helps residents report issues and dorm teams manage each request.{% else %}ช่วยให้ผู้พักแจ้งปัญหาได้สะดวก และทีมดูแลหอพักจัดการแต่ละรายการได้อย่างเป็นระบบ{% endif %}</p>
+  </header>
+
+  <div class="features-grid">
+    <article class="feature-detail-card">
+      <span class="feature-symbol feature-symbol-blue" aria-hidden="true">＋</span>
+      <span class="feature-number">01</span>
+      <h2>{% if request.LANGUAGE_CODE == 'en' %}Easy repair reporting{% else %}แจ้งซ่อมได้ง่าย{% endif %}</h2>
+      <p>{% if request.LANGUAGE_CODE == 'en' %}Submit the issue, category, room location, and description together in one request.{% else %}ระบุหัวข้อ ประเภทปัญหา ห้องพัก และรายละเอียดได้ครบในรายการเดียว{% endif %}</p>
+    </article>
+    <article class="feature-detail-card">
+      <span class="feature-symbol feature-symbol-teal" aria-hidden="true">◷</span>
+      <span class="feature-number">02</span>
+      <h2>{% if request.LANGUAGE_CODE == 'en' %}Track request status{% else %}ติดตามสถานะงาน{% endif %}</h2>
+      <p>{% if request.LANGUAGE_CODE == 'en' %}See whether a request is received, in progress, waiting for parts, or completed.{% else %}ตรวจสอบได้ว่าเรื่องรับแจ้งแล้ว กำลังดำเนินการ รออะไหล่ หรือเสร็จสิ้นแล้ว{% endif %}</p>
+    </article>
+    <article class="feature-detail-card">
+      <span class="feature-symbol feature-symbol-amber" aria-hidden="true">▧</span>
+      <span class="feature-number">03</span>
+      <h2>{% if request.LANGUAGE_CODE == 'en' %}Attach a photo{% else %}แนบรูปประกอบ{% endif %}</h2>
+      <p>{% if request.LANGUAGE_CODE == 'en' %}Add an image to help explain the problem and give the dorm team useful context.{% else %}เพิ่มรูปภาพเพื่อช่วยอธิบายปัญหาและให้ทีมดูแลเข้าใจรายละเอียดได้ชัดเจนขึ้น{% endif %}</p>
+    </article>
+    <article class="feature-detail-card">
+      <span class="feature-symbol feature-symbol-amber" aria-hidden="true">▤</span>
+      <span class="feature-number">04</span>
+      <h2>{% if request.LANGUAGE_CODE == 'en' %}One dashboard{% else %}แดชบอร์ดรวมรายการ{% endif %}</h2>
+      <p>{% if request.LANGUAGE_CODE == 'en' %}Residents can review their own requests, while supervisors can oversee repair reports in one place.{% else %}ผู้พักดูรายการของตนเองได้ ส่วนผู้ดูแลสามารถตรวจสอบรายการแจ้งซ่อมทั้งหมดจากแดชบอร์ด{% endif %}</p>
+    </article>
+    <article class="feature-detail-card">
+      <span class="feature-symbol feature-symbol-blue" aria-hidden="true">✓</span>
+      <span class="feature-number">05</span>
+      <h2>{% if request.LANGUAGE_CODE == 'en' %}Clear repair updates{% else %}อัปเดตความคืบหน้าชัดเจน{% endif %}</h2>
+      <p>{% if request.LANGUAGE_CODE == 'en' %}Supervisors can update a request, assign a staff member, and leave a note.{% else %}ผู้ดูแลอัปเดตสถานะ มอบหมายผู้รับผิดชอบ และเพิ่มบันทึกให้แต่ละรายการได้{% endif %}</p>
+    </article>
+    <article class="feature-detail-card">
+      <span class="feature-symbol feature-symbol-teal" aria-hidden="true">文</span>
+      <span class="feature-number">06</span>
+      <h2>{% if request.LANGUAGE_CODE == 'en' %}Thai and English{% else %}รองรับไทยและอังกฤษ{% endif %}</h2>
+      <p>{% if request.LANGUAGE_CODE == 'en' %}Switch between Thai and English to use DormFix in the language you prefer.{% else %}สลับการแสดงผลระหว่างภาษาไทยและภาษาอังกฤษได้ตามสะดวก{% endif %}</p>
+    </article>
+  </div>
+
+  <div class="features-cta">
+    <div>
+      <h2>{% if request.LANGUAGE_CODE == 'en' %}Ready to get started?{% else %}พร้อมเริ่มใช้งานหรือยัง?{% endif %}</h2>
+      <p>{% if request.LANGUAGE_CODE == 'en' %}Report and follow up on dorm repairs in one place.{% else %}เริ่มแจ้งและติดตามงานซ่อมในหอพักได้จากที่เดียว{% endif %}</p>
+    </div>
+    {% if request.user.is_authenticated %}
+    <a class="home-primary" href="{% url 'repair_create' %}">{% if request.LANGUAGE_CODE == 'en' %}Report a repair{% else %}แจ้งซ่อมเลย{% endif %}<span>→</span></a>
+    {% else %}
+    <a class="home-primary" href="{% url 'register' %}">{% if request.LANGUAGE_CODE == 'en' %}Get started{% else %}เริ่มใช้งาน{% endif %}<span>→</span></a>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

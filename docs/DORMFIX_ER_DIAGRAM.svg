@@ -1,0 +1,228 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="950" viewBox="0 0 1440 950" role="img" aria-labelledby="title description">
+  <title id="title">DormFix entity relationship diagram</title>
+  <desc id="description">A tidy overview of the DormFix database tables and their foreign-key relationships. Arrows point to the table containing the foreign key.</desc>
+  <defs>
+    <linearGradient id="background" x2="0" y2="1">
+      <stop stop-color="#f8faff"/>
+      <stop offset="1" stop-color="#f3f7fb"/>
+    </linearGradient>
+    <linearGradient id="blue" x2="1" y2="1">
+      <stop stop-color="#526cf4"/>
+      <stop offset="1" stop-color="#7955e8"/>
+    </linearGradient>
+    <linearGradient id="teal" x2="1" y2="1">
+      <stop stop-color="#0a9b98"/>
+      <stop offset="1" stop-color="#13b88c"/>
+    </linearGradient>
+    <linearGradient id="coral" x2="1" y2="1">
+      <stop stop-color="#ef6e79"/>
+      <stop offset="1" stop-color="#ed4d99"/>
+    </linearGradient>
+    <linearGradient id="amber" x2="1" y2="1">
+      <stop stop-color="#eca02e"/>
+      <stop offset="1" stop-color="#f0784b"/>
+    </linearGradient>
+    <filter id="shadow" x="-15%" y="-15%" width="130%" height="140%">
+      <feDropShadow dx="0" dy="7" stdDeviation="8" flood-color="#33466b" flood-opacity=".12"/>
+    </filter>
+    <marker id="arrow-user" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M1 1 11 6 1 11Z" fill="#5669e8"/>
+    </marker>
+    <marker id="arrow-repair" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M1 1 11 6 1 11Z" fill="#079b91"/>
+    </marker>
+    <marker id="arrow-comment" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M1 1 11 6 1 11Z" fill="#e85d8a"/>
+    </marker>
+    <marker id="arrow-audit" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M1 1 11 6 1 11Z" fill="#d99025"/>
+    </marker>
+    <style>
+      text { font-family: "Segoe UI", Arial, sans-serif; fill: #202b45; }
+      .title { font-size: 32px; font-weight: 750; letter-spacing: -.4px; }
+      .subtitle { font-size: 15px; fill: #68748e; }
+      .section { font-size: 11px; font-weight: 750; letter-spacing: 1.5px; fill: #7c88a1; }
+      .card { fill: #fff; stroke: #e1e7f1; stroke-width: 1.5; rx: 16; filter: url(#shadow); transition: transform .2s ease, filter .2s ease; transform-box: fill-box; transform-origin: center; }
+      .table:hover .card { transform: translateY(-3px); filter: drop-shadow(0 12px 15px #5267d933); }
+      .head { fill: url(#blue); }
+      .head-teal { fill: url(#teal); }
+      .head-coral { fill: url(#coral); }
+      .head-amber { fill: url(#amber); }
+      .name { font-size: 16px; font-weight: 750; fill: #fff; letter-spacing: .2px; }
+      .caption { font-size: 11px; font-weight: 600; fill: #fff; opacity: .87; }
+      .field { font-size: 13px; }
+      .muted { fill: #738099; }
+      .pk { font-size: 10px; font-weight: 800; fill: #5265df; }
+      .fk { font-size: 10px; font-weight: 800; fill: #078b82; }
+      .separator { stroke: #edf0f6; stroke-width: 1; }
+      .edge { fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 7 8; animation: flow 3s linear infinite; }
+      .user-edge { stroke: #5669e8; marker-end: url(#arrow-user); }
+      .repair-edge { stroke: #079b91; marker-end: url(#arrow-repair); }
+      .comment-edge { stroke: #e85d8a; marker-end: url(#arrow-comment); }
+      .audit-edge { stroke: #d99025; marker-end: url(#arrow-audit); }
+      .edge-label-bg { fill: #fff; stroke: #e5e9f1; stroke-width: 1; rx: 10; }
+      .edge-label { font-size: 11px; font-weight: 700; }
+      .pulse { animation: pulse 1.8s ease-in-out infinite; }
+      .legend-card { fill: #fff; stroke: #e1e7f1; stroke-width: 1.5; rx: 14; }
+      .legend-title { font-size: 13px; font-weight: 750; }
+      .legend-text { font-size: 11px; fill: #66738e; }
+      .badge { fill: #edf2ff; }
+      .badge-text { font-size: 10px; font-weight: 750; fill: #5366d8; letter-spacing: .5px; }
+      @keyframes flow { to { stroke-dashoffset: -30; } }
+      @keyframes pulse { 0%, 100% { opacity: .72; r: 4; } 50% { opacity: 1; r: 6; } }
+      @media (prefers-reduced-motion: reduce) {
+        .edge, .pulse { animation: none; }
+        .card { transition: none; }
+      }
+    </style>
+  </defs>
+
+  <rect width="1440" height="950" fill="url(#background)"/>
+
+  <text class="title" x="52" y="58">DormFix <tspan fill="#a1abc0">/</tspan> ER Diagram</text>
+  <text class="subtitle" x="54" y="84">ตารางข้อมูลหลักและเส้นทางความสัมพันธ์ในระบบ</text>
+  <rect class="badge" x="1198" y="40" width="190" height="32" rx="16"/>
+  <circle cx="1217" cy="56" r="4" fill="#10b981"/>
+  <text class="badge-text" x="1229" y="60">DJANGO MODELS · SQLITE</text>
+
+  <text class="section" x="60" y="145">บัญชีและงานซ่อม</text>
+  <text class="section" x="1030" y="145">การสื่อสารและแจ้งเตือน</text>
+
+  <!-- Arrows point to the table that stores the foreign key. -->
+  <g aria-label="Data relationships">
+    <path class="edge user-edge" d="M370 326 H500"/>
+    <circle class="pulse" cx="370" cy="326" r="4" fill="#5669e8"/>
+    <rect class="edge-label-bg" x="384" y="298" width="105" height="23"/>
+    <text class="edge-label" x="397" y="314" fill="#4e61d8">ผู้แจ้ง · 1:N</text>
+
+    <path class="edge user-edge" d="M370 455 H432 V485 H500"/>
+    <circle class="pulse" cx="370" cy="455" r="4" fill="#5669e8"/>
+    <rect class="edge-label-bg" x="384" y="461" width="108" height="38"/>
+    <text class="edge-label" x="394" y="477" fill="#4e61d8">ผู้รับผิดชอบ</text>
+    <text class="edge-label" x="394" y="491" fill="#4e61d8">1:N · ไม่บังคับ</text>
+
+    <path class="edge user-edge" d="M370 230 H430 V155 H1200 V185"/>
+    <circle class="pulse" cx="370" cy="230" r="4" fill="#5669e8"/>
+    <rect class="edge-label-bg" x="682" y="141" width="192" height="23"/>
+    <text class="edge-label" x="696" y="157" fill="#4e61d8">ผู้เขียนความคิดเห็น · 1:N</text>
+
+    <path class="edge comment-edge" d="M890 326 H1030"/>
+    <circle class="pulse" cx="890" cy="326" r="4" fill="#e85d8a"/>
+    <rect class="edge-label-bg" x="902" y="298" width="114" height="23"/>
+    <text class="edge-label" x="914" y="314" fill="#d94d7d">มีความคิดเห็น · 1:N</text>
+
+    <path class="edge repair-edge" d="M890 592 H1030"/>
+    <circle class="pulse" cx="890" cy="592" r="4" fill="#079b91"/>
+    <rect class="edge-label-bg" x="905" y="564" width="105" height="23"/>
+    <text class="edge-label" x="918" y="580" fill="#078b82">อ้างถึงคำร้อง</text>
+
+    <path class="edge user-edge" d="M240 550 V690 H1000 V660 H1030"/>
+    <circle class="pulse" cx="240" cy="550" r="4" fill="#5669e8"/>
+    <rect class="edge-label-bg" x="649" y="674" width="142" height="23"/>
+    <text class="edge-label" x="662" y="690" fill="#4e61d8">ผู้รับแจ้งเตือน · 1:N</text>
+
+    <path class="edge audit-edge" d="M350 520 H480 V808 H500"/>
+    <circle class="pulse" cx="350" cy="520" r="4" fill="#d99025"/>
+    <rect class="edge-label-bg" x="374" y="533" width="98" height="25"/>
+    <text class="edge-label" x="385" y="550" fill="#c27c15">ผู้ดำเนินการ</text>
+  </g>
+
+  <!-- USER -->
+  <g class="table" aria-label="User table">
+    <rect class="card" x="60" y="185" width="310" height="365"/>
+    <path class="head" d="M76 185 H354 Q370 185 370 201 V250 H60 V201 Q60 185 76 185Z"/>
+    <circle cx="342" cy="217" r="16" fill="#fff" opacity=".2"/>
+    <text x="333" y="223" font-size="17" fill="#fff">♙</text>
+    <text class="name" x="82" y="215">USER</text>
+    <text class="caption" x="82" y="235">บัญชีผู้พักอาศัยและผู้ดูแล</text>
+    <text class="field" x="82" y="282"><tspan class="pk">PK</tspan><tspan>  id</tspan></text>
+    <line class="separator" x1="80" y1="295" x2="350" y2="295"/>
+    <text class="field" x="82" y="322">username · email</text>
+    <text class="field" x="82" y="354">password <tspan class="muted">(Django hash)</tspan></text>
+    <text class="field" x="82" y="386">role <tspan class="muted">(resident / supervisor)</tspan></text>
+    <text class="field" x="82" y="418">room_number</text>
+    <rect x="80" y="448" width="270" height="70" rx="10" fill="#f1f3ff"/>
+    <text class="field muted" x="96" y="475">รวมข้อมูลบัญชีและการยืนยัน</text>
+    <text class="field muted" x="96" y="496">ตัวตนพื้นฐานจาก Django</text>
+  </g>
+
+  <!-- REPAIR_REQUEST -->
+  <g class="table" aria-label="Repair request table">
+    <rect class="card" x="500" y="185" width="390" height="470"/>
+    <path class="head-teal" d="M516 185 H874 Q890 185 890 201 V250 H500 V201 Q500 185 516 185Z"/>
+    <circle cx="862" cy="217" r="16" fill="#fff" opacity=".2"/>
+    <text x="853" y="223" font-size="17" fill="#fff">⌁</text>
+    <text class="name" x="522" y="215">REPAIR_REQUEST</text>
+    <text class="caption" x="522" y="235">คำร้องหลักและสถานะงานซ่อม</text>
+    <text class="field" x="522" y="282"><tspan class="pk">PK</tspan><tspan>  id</tspan></text>
+    <line class="separator" x1="520" y1="295" x2="870" y2="295"/>
+    <text class="field" x="522" y="322"><tspan class="fk">FK</tspan><tspan>  reported_by_id → USER</tspan></text>
+    <text class="field" x="522" y="354"><tspan class="fk">FK</tspan><tspan>  assigned_to_id → USER</tspan></text>
+    <text class="field" x="522" y="386">title · description · category</text>
+    <text class="field" x="522" y="418">location · status · rating</text>
+    <text class="field" x="522" y="450">image · supervisor_note</text>
+    <rect x="520" y="469" width="350" height="77" rx="10" fill="#eaf9f5"/>
+    <text class="field" x="536" y="495">AI summary · category suggestion</text>
+    <text class="field" x="536" y="519">urgency · analysis timestamp</text>
+    <text class="field muted" x="522" y="577">created_at · updated_at</text>
+    <rect x="520" y="602" width="162" height="27" rx="13" fill="#e5f7f2"/>
+    <text class="badge-text" x="534" y="620" fill="#078b82">จุดเริ่มต้นของงานซ่อม</text>
+  </g>
+
+  <!-- REPAIR_COMMENT -->
+  <g class="table" aria-label="Repair comment table">
+    <rect class="card" x="1030" y="185" width="350" height="235"/>
+    <path class="head-coral" d="M1046 185 H1364 Q1380 185 1380 201 V250 H1030 V201 Q1030 185 1046 185Z"/>
+    <circle cx="1352" cy="217" r="16" fill="#fff" opacity=".2"/>
+    <text x="1344" y="223" font-size="16" fill="#fff">▤</text>
+    <text class="name" x="1052" y="215">REPAIR_COMMENT</text>
+    <text class="caption" x="1052" y="235">การสนทนาในแต่ละคำร้อง</text>
+    <text class="field" x="1052" y="282"><tspan class="pk">PK</tspan><tspan>  id</tspan></text>
+    <text class="field" x="1052" y="314"><tspan class="fk">FK</tspan><tspan>  repair_id → REPAIR_REQUEST</tspan></text>
+    <text class="field" x="1052" y="346"><tspan class="fk">FK</tspan><tspan>  author_id → USER</tspan></text>
+    <text class="field" x="1052" y="378">body · created_at</text>
+  </g>
+
+  <!-- NOTIFICATION -->
+  <g class="table" aria-label="Notification table">
+    <rect class="card" x="1030" y="535" width="350" height="235"/>
+    <path class="head-amber" d="M1046 535 H1364 Q1380 535 1380 551 V600 H1030 V551 Q1030 535 1046 535Z"/>
+    <circle cx="1352" cy="567" r="16" fill="#fff" opacity=".2"/>
+    <text x="1344" y="573" font-size="16" fill="#fff">♧</text>
+    <text class="name" x="1052" y="565">NOTIFICATION</text>
+    <text class="caption" x="1052" y="585">แจ้งความเคลื่อนไหวให้ผู้ใช้</text>
+    <text class="field" x="1052" y="632"><tspan class="pk">PK</tspan><tspan>  id</tspan></text>
+    <text class="field" x="1052" y="664"><tspan class="fk">FK</tspan><tspan>  user_id → USER</tspan></text>
+    <text class="field" x="1052" y="696"><tspan class="fk">FK</tspan><tspan>  reference_id → REPAIR_REQUEST</tspan></text>
+    <text class="field" x="1052" y="728">title · type · is_read · created_at</text>
+    <text class="field muted" x="1052" y="751">reference_id อาจเว้นว่างได้</text>
+  </g>
+
+  <!-- ACCOUNT_AUDIT_LOG -->
+  <g class="table" aria-label="Account audit log table">
+    <rect class="card" x="500" y="735" width="390" height="175"/>
+    <path class="head-amber" d="M516 735 H874 Q890 735 890 751 V800 H500 V751 Q500 735 516 735Z"/>
+    <circle cx="862" cy="767" r="16" fill="#fff" opacity=".2"/>
+    <text x="853" y="773" font-size="16" fill="#fff">◷</text>
+    <text class="name" x="522" y="765">ACCOUNT_AUDIT_LOG</text>
+    <text class="caption" x="522" y="785">ประวัติการเปลี่ยนแปลงบัญชี</text>
+    <text class="field" x="522" y="833"><tspan class="pk">PK</tspan><tspan>  id</tspan></text>
+    <text class="field" x="522" y="861"><tspan class="fk">FK</tspan><tspan>  actor_id · target_id → USER (optional)</tspan></text>
+    <text class="field" x="522" y="889">action · old/new value · created_at</text>
+  </g>
+
+  <!-- Compact reading guide -->
+  <g aria-label="Reading guide">
+    <rect class="legend-card" x="60" y="700" width="365" height="190"/>
+    <text class="legend-title" x="82" y="733">วิธีอ่านแผนภาพ</text>
+    <path class="edge user-edge" d="M84 760 H151"/>
+    <circle cx="84" cy="760" r="4" fill="#5669e8"/>
+    <text class="legend-text" x="166" y="764">ลูกศรชี้ไปยังตารางที่เก็บ FK</text>
+    <text class="legend-text" x="82" y="795"><tspan font-weight="700" fill="#4e61d8">1:N</tspan> หนึ่งรายการเชื่อมโยงกับหลายรายการ</text>
+    <text class="legend-text" x="82" y="821"><tspan font-weight="700" fill="#078b82">FK</tspan> Foreign Key · <tspan font-weight="700" fill="#5265df">PK</tspan> Primary Key</text>
+    <line x1="82" y1="840" x2="403" y2="840" stroke="#edf0f6"/>
+    <text class="legend-text" x="82" y="864">รหัสผ่านเก็บเป็นแฮช · optional คือเว้นว่างได้</text>
+  </g>
+
+  <text x="60" y="928" font-size="11" fill="#8490a7">DORMFIX DATABASE MAP</text>
+</svg>

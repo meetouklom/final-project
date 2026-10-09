@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{% if request.LANGUAGE_CODE == 'en' %}Account history · DormFix{% else %}ประวัติการจัดการบัญชี · DormFix{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="account-management-page account-activity-page">
+    <header class="dashboard-heading account-management-heading">
+        <div>
+            <span class="eyebrow">{% if request.LANGUAGE_CODE == 'en' %}SUPERVISOR CONSOLE{% else %}สำหรับผู้ดูแลหอพัก{% endif %}</span>
+            <h1>{% if request.LANGUAGE_CODE == 'en' %}Account management history{% else %}ประวัติการจัดการบัญชี{% endif %}</h1>
+            <p>{% if request.LANGUAGE_CODE == 'en' %}A record of who changed account roles or access, and when each change happened.{% else %}ตรวจสอบว่าใครเปลี่ยนบทบาทหรือสถานะบัญชี และดำเนินการเมื่อใด{% endif %}</p>
+        </div>
+        <a class="page-back-button" href="{% url 'account_management' %}">
+            <span aria-hidden="true">←</span>
+            {% if request.LANGUAGE_CODE == 'en' %}Back to accounts{% else %}กลับไปหน้าจัดการบัญชี{% endif %}
+        </a>
+    </header>
+
+    <section class="account-audit-card dashboard-card" aria-labelledby="account-audit-title">
+        <header class="dashboard-card-heading">
+            <div>
+                <h2 id="account-audit-title">{% if request.LANGUAGE_CODE == 'en' %}Audit log{% else %}บันทึกการเปลี่ยนแปลง{% endif %}</h2>
+                <p>{% if request.LANGUAGE_CODE == 'en' %}Account actions are recorded automatically and cannot be edited here.{% else %}ระบบบันทึกการเปลี่ยนแปลงโดยอัตโนมัติ และไม่สามารถแก้ไขประวัติจากหน้านี้ได้{% endif %}</p>
+            </div>
+        </header>
+
+        <form class="account-audit-filters" method="get">
+            <label>
+                <span>{% if request.LANGUAGE_CODE == 'en' %}Search accounts{% else %}ค้นหาบัญชี{% endif %}</span>
+                <input type="search" name="q" value="{{ search }}" placeholder="{% if request.LANGUAGE_CODE == 'en' %}Actor or affected account{% else %}ผู้ดำเนินการหรือบัญชีที่ถูกเปลี่ยน{% endif %}">
+            </label>
+            <label>
+                <span>{% if request.LANGUAGE_CODE == 'en' %}Action{% else %}การดำเนินการ{% endif %}</span>
+                <select name="action">
+                    <option value="">{% if request.LANGUAGE_CODE == 'en' %}All actions{% else %}ทุกการดำเนินการ{% endif %}</option>
+                    {% for value, label in action_choices %}
+                    <option value="{{ value }}"{% if action_filter == value %} selected{% endif %}>
+                        {% if value == 'role_changed' %}{% if request.LANGUAGE_CODE == 'en' %}Role changed{% else %}เปลี่ยนบทบาท{% endif %}
+                        {% elif value == 'account_deactivated' %}{% if request.LANGUAGE_CODE == 'en' %}Account deactivated{% else %}ปิดใช้งานบัญชี{% endif %}
+                        {% else %}{% if request.LANGUAGE_CODE == 'en' %}Account activated{% else %}เปิดใช้งานบัญชี{% endif %}{% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+            </label>
+            <button class="primary-button" type="submit">{% if request.LANGUAGE_CODE == 'en' %}Filter{% else %}กรอง{% endif %}</button>
+            {% if search or action_filter %}<a class="secondary-button" href="{% url 'account_activity' %}">{% if request.LANGUAGE_CODE == 'en' %}Clear{% else %}ล้างตัวกรอง{% endif %}</a>{% endif %}
+        </form>
+
+        <p class="account-result-count" role="status">
+            {% if request.LANGUAGE_CODE == 'en' %}{{ page_obj.paginator.count }} change{{ page_obj.paginator.count|pluralize }}{% else %}{{ page_obj.paginator.count }} รายการ{% endif %}
+        </p>
+
+        <div class="account-audit-list">
+            {% for entry in entries %}
+            <article class="account-audit-entry">
+                <span class="account-audit-icon action-{{ entry.action }}" aria-hidden="true">
+                    {% if entry.action == 'role_changed' %}⇄{% elif entry.action == 'account_deactivated' %}−{% else %}+{% endif %}
+                </span>
+                <div class="account-audit-details">
+                    <p>
+                        <strong>{{ entry.actor_username }}</strong>
+                        {% if entry.action == 'role_changed' %}
+                            {% if request.LANGUAGE_CODE == 'en' %}changed role of{% else %}เปลี่ยนบทบาทของ{% endif %}
+                        {% elif entry.action == 'account_deactivated' %}
+                            {% if request.LANGUAGE_CODE == 'en' %}deactivated{% else %}ปิดใช้งานบัญชี{% endif %}
+                        {% else %}
+                            {% if request.LANGUAGE_CODE == 'en' %}activated{% else %}เปิดใช้งานบัญชี{% endif %}
+                        {% endif %}
+                        <strong>{{ entry.target_username }}</strong>
+                    </p>
+                    <span class="account-audit-change">
+                        {% if entry.action == 'role_changed' %}
+                            {% if entry.old_value == 'supervisor' %}{% if request.LANGUAGE_CODE == 'en' %}Supervisor{% else %}ผู้ดูแลหอพัก{% endif %}{% else %}{% if request.LANGUAGE_CODE == 'en' %}Resident{% else %}ผู้พักอาศัย{% endif %}{% endif %}
+                            <span aria-hidden="true">→</span>
+                            {% if entry.new_value == 'supervisor' %}{% if request.LANGUAGE_CODE == 'en' %}Supervisor{% else %}ผู้ดูแลหอพัก{% endif %}{% else %}{% if request.LANGUAGE_CODE == 'en' %}Resident{% else %}ผู้พักอาศัย{% endif %}{% endif %}
+                        {% elif entry.action == 'account_deactivated' %}
+                            {% if request.LANGUAGE_CODE == 'en' %}Active{% else %}ใช้งาน{% endif %}<span aria-hidden="true">→</span>{% if request.LANGUAGE_CODE == 'en' %}Inactive{% else %}ปิดใช้งาน{% endif %}
+                        {% else %}
+                            {% if request.LANGUAGE_CODE == 'en' %}Inactive{% else %}ปิดใช้งาน{% endif %}<span aria-hidden="true">→</span>{% if request.LANGUAGE_CODE == 'en' %}Active{% else %}ใช้งาน{% endif %}
+                        {% endif %}
+                    </span>
+                </div>
+                <time class="account-audit-time" datetime="{{ entry.created_at|date:'c' }}">{{ entry.created_at|date:"DATETIME_FORMAT" }}</time>
+            </article>
+            {% empty %}
+            <div class="comment-inbox-empty">
+                <span aria-hidden="true">◷</span>
+                <h2>{% if request.LANGUAGE_CODE == 'en' %}No account changes found{% else %}ยังไม่มีประวัติการเปลี่ยนแปลง{% endif %}</h2>
+                <p>{% if request.LANGUAGE_CODE == 'en' %}Role and activation changes will be recorded here.{% else %}เมื่อมีการเปลี่ยนบทบาทหรือสถานะบัญชี ประวัติจะแสดงที่นี่{% endif %}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if page_obj.paginator.num_pages > 1 %}
+        <nav class="account-pagination" aria-label="{% if request.LANGUAGE_CODE == 'en' %}Audit log pages{% else %}หน้าประวัติการจัดการ{% endif %}">
+            {% if page_obj.has_previous %}<a href="?{{ filter_query }}{% if filter_query %}&amp;{% endif %}page={{ page_obj.previous_page_number }}">{% if request.LANGUAGE_CODE == 'en' %}Previous{% else %}ก่อนหน้า{% endif %}</a>{% else %}<span class="disabled">{% if request.LANGUAGE_CODE == 'en' %}Previous{% else %}ก่อนหน้า{% endif %}</span>{% endif %}
+            <span>{% if request.LANGUAGE_CODE == 'en' %}Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}{% else %}หน้า {{ page_obj.number }} จาก {{ page_obj.paginator.num_pages }}{% endif %}</span>
+            {% if page_obj.has_next %}<a href="?{{ filter_query }}{% if filter_query %}&amp;{% endif %}page={{ page_obj.next_page_number }}">{% if request.LANGUAGE_CODE == 'en' %}Next{% else %}ถัดไป{% endif %}</a>{% else %}<span class="disabled">{% if request.LANGUAGE_CODE == 'en' %}Next{% else %}ถัดไป{% endif %}</span>{% endif %}
+        </nav>
+        {% endif %}
+    </section>
+</section>
+{% endblock %}

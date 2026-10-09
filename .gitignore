@@ -1,0 +1,33 @@
+# Python bytecode and tooling
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments and local environment variables
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+
+# Local database files
+db.sqlite3
+db.sqlite3-*
+*.sqlite3-journal
+
+# User uploads and collected static files
+/media/
+/staticfiles/
+
+# Local private reference files
+/รหัส/
+
+# Operating system and editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo

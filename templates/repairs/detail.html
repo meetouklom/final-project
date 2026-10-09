@@ -1,0 +1,301 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{% if request.LANGUAGE_CODE == 'en' %}Request #{{ repair.pk }} · DormFix{% else %}รายการ #{{ repair.pk }} · DormFix{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="detail-page">
+    <a class="back-link detail-back-link" href="{% url 'dashboard' %}">
+        <span aria-hidden="true">←</span>{% if request.LANGUAGE_CODE == 'en' %}Back to dashboard{% else %}กลับแดชบอร์ด{% endif %}
+    </a>
+
+    <header class="repair-detail-heading">
+        <div>
+            <span class="eyebrow">{% if request.LANGUAGE_CODE == 'en' %}REPAIR REQUEST{% else %}รายการแจ้งซ่อม{% endif %} #{{ repair.pk|stringformat:'04d' }}</span>
+            <h1>{{ repair.title }}</h1>
+            <p>
+                {% if request.LANGUAGE_CODE == 'en' %}Reported by{% else %}แจ้งโดย{% endif %}
+                <strong>{{ repair.reported_by.get_full_name|default:repair.reported_by.username }}</strong>
+                <span aria-hidden="true">·</span>
+                {{ repair.created_at|date:"DATETIME_FORMAT" }}
+            </p>
+        </div>
+        <span class="status status-{{ repair.status }}">
+            {% if repair.status == 'received' %}{% if request.LANGUAGE_CODE == 'en' %}Received{% else %}รับแจ้งแล้ว{% endif %}
+            {% elif repair.status == 'in_progress' %}{% if request.LANGUAGE_CODE == 'en' %}In progress{% else %}กำลังดำเนินการ{% endif %}
+            {% elif repair.status == 'waiting' %}{% if request.LANGUAGE_CODE == 'en' %}Waiting for parts{% else %}รออะไหล่{% endif %}
+            {% elif repair.status == 'completed' %}{% if request.LANGUAGE_CODE == 'en' %}Completed{% else %}เสร็จสิ้น{% endif %}
+            {% else %}{% if request.LANGUAGE_CODE == 'en' %}Cancelled{% else %}ยกเลิก{% endif %}{% endif %}
+        </span>
+    </header>
+
+    {% if request.user.is_supervisor %}
+    <article class="detail-card management-card ai-assistant-card" id="ai-analysis">
+        <header class="detail-card-heading">
+            <div>
+                <span class="detail-card-kicker">{% if request.LANGUAGE_CODE == 'en' %}LOCAL AI ASSISTANT{% else %}ผู้ช่วย AI ในเครื่อง{% endif %}</span>
+                <h2>{% if request.LANGUAGE_CODE == 'en' %}Analyze this request{% else %}ให้ AI ช่วยวิเคราะห์คำร้องนี้{% endif %}</h2>
+            </div>
+        </header>
+        <p class="muted">{% if request.LANGUAGE_CODE == 'en' %}Press the button to get a summary, suggested category, and urgency. AI will not change the request.{% else %}กดปุ่มด้านล่างเพื่อให้ AI สรุปปัญหา แนะนำหมวดหมู่ และประเมินความเร่งด่วน โดย AI จะไม่เปลี่ยนข้อมูลคำร้อง{% endif %}</p>
+        <form method="post" action="{% url 'repair_ai_analyze' repair.pk %}" class="ai-assistant-form">
+            {% csrf_token %}
+            <button class="primary-button ai-assistant-button" type="submit">
+                <span aria-hidden="true">✦</span>
+                {% if repair.ai_analyzed_at %}{% if request.LANGUAGE_CODE == 'en' %}Analyze again with AI{% else %}วิเคราะห์ด้วย AI อีกครั้ง{% endif %}{% else %}{% if request.LANGUAGE_CODE == 'en' %}Analyze with AI{% else %}กดที่นี่เพื่อวิเคราะห์ด้วย AI{% endif %}{% endif %}
+                <span aria-hidden="true">→</span>
+            </button>
+        </form>
+        {% if repair.ai_analyzed_at %}
+        <dl class="repair-metadata ai-analysis-results">
+            <div>
+                <dt>{% if request.LANGUAGE_CODE == 'en' %}AI summary{% else %}สรุปปัญหา{% endif %}</dt>
+                <dd>{% if request.LANGUAGE_CODE == 'en' %}{{ repair.ai_summary_en|default:repair.ai_summary }}{% else %}{{ repair.ai_summary_th }}{% endif %}</dd>
+            </div>
+            <div>
+                <dt>{% if request.LANGUAGE_CODE == 'en' %}Suggested category{% else %}หมวดหมู่ที่แนะนำ{% endif %}</dt>
+                <dd>
+                    {% if repair.ai_suggested_category == 'electricity' %}{% if request.LANGUAGE_CODE == 'en' %}Electricity{% else %}ไฟฟ้า{% endif %}
+                    {% elif repair.ai_suggested_category == 'plumbing' %}{% if request.LANGUAGE_CODE == 'en' %}Plumbing{% else %}ประปา{% endif %}
+                    {% elif repair.ai_suggested_category == 'furniture' %}{% if request.LANGUAGE_CODE == 'en' %}Furniture{% else %}เฟอร์นิเจอร์{% endif %}
+                    {% elif repair.ai_suggested_category == 'internet' %}{% if request.LANGUAGE_CODE == 'en' %}Internet{% else %}อินเทอร์เน็ต{% endif %}
+                    {% else %}{% if request.LANGUAGE_CODE == 'en' %}Other{% else %}อื่น ๆ{% endif %}{% endif %}
+                </dd>
+            </div>
+            <div>
+                <dt>{% if request.LANGUAGE_CODE == 'en' %}Suggested urgency{% else %}ระดับความเร่งด่วนที่แนะนำ{% endif %}</dt>
+                <dd>
+                    {% if repair.ai_urgency == 'urgent' %}{% if request.LANGUAGE_CODE == 'en' %}Urgent{% else %}เร่งด่วน{% endif %}
+                    {% elif repair.ai_urgency == 'low' %}{% if request.LANGUAGE_CODE == 'en' %}Low{% else %}ต่ำ{% endif %}
+                    {% else %}{% if request.LANGUAGE_CODE == 'en' %}Normal{% else %}ปกติ{% endif %}{% endif %}
+                </dd>
+            </div>
+            <div>
+                <dt>{% if request.LANGUAGE_CODE == 'en' %}Reason{% else %}เหตุผลประกอบ{% endif %}</dt>
+                <dd>{% if request.LANGUAGE_CODE == 'en' %}{{ repair.ai_reason_en|default:repair.ai_reason }}{% else %}{{ repair.ai_reason_th }}{% endif %}</dd>
+            </div>
+            <div>
+                <dt>{% if request.LANGUAGE_CODE == 'en' %}Analyzed{% else %}เวลาที่วิเคราะห์{% endif %}</dt>
+                <dd>{{ repair.ai_analyzed_at|date:"DATETIME_FORMAT" }}</dd>
+            </div>
+        </dl>
+        {% if not repair.ai_summary_th or not repair.ai_reason_th %}
+        <p class="ai-assistant-disclaimer">{% if request.LANGUAGE_CODE == 'en' %}This request has an older AI result without Thai translation. Select Thai and analyze it again to generate both languages.{% else %}ผลวิเคราะห์เดิมยังไม่มีภาษาไทย กรุณากดวิเคราะห์ด้วย AI อีกครั้งเพื่อสร้างผลทั้งภาษาไทยและอังกฤษ{% endif %}</p>
+        {% endif %}
+        {% endif %}
+        <p class="ai-assistant-disclaimer">{% if request.LANGUAGE_CODE == 'en' %}AI suggestions may be incorrect. Please review before acting.{% else %}คำแนะนำจาก AI อาจไม่ถูกต้อง โปรดตรวจสอบก่อนดำเนินการ{% endif %}</p>
+    </article>
+    {% endif %}
+
+    <section class="repair-stepper" aria-label="{% if request.LANGUAGE_CODE == 'en' %}Repair progress{% else %}ความคืบหน้าการซ่อม{% endif %}">
+        <div class="repair-step {% if repair.status == 'received' %}is-current{% else %}is-complete{% endif %}">
+            <span class="repair-step-marker">{% if repair.status == 'received' %}1{% else %}✓{% endif %}</span>
+            <span>{% if request.LANGUAGE_CODE == 'en' %}Received{% else %}รับแจ้งแล้ว{% endif %}</span>
+        </div>
+        <span class="repair-step-line {% if repair.status == 'in_progress' or repair.status == 'waiting' or repair.status == 'completed' %}is-complete{% endif %}" aria-hidden="true"></span>
+        <div class="repair-step {% if repair.status == 'in_progress' or repair.status == 'waiting' %}is-current{% elif repair.status == 'completed' %}is-complete{% endif %}">
+            <span class="repair-step-marker">{% if repair.status == 'in_progress' or repair.status == 'waiting' %}2{% elif repair.status == 'completed' %}✓{% else %}2{% endif %}</span>
+            <span>{% if repair.status == 'waiting' %}{% if request.LANGUAGE_CODE == 'en' %}Waiting for parts{% else %}รออะไหล่{% endif %}{% else %}{% if request.LANGUAGE_CODE == 'en' %}In progress{% else %}กำลังดำเนินการ{% endif %}{% endif %}</span>
+        </div>
+        <span class="repair-step-line {% if repair.status == 'completed' %}is-complete{% endif %}" aria-hidden="true"></span>
+        <div class="repair-step {% if repair.status == 'completed' %}is-complete{% elif repair.status == 'cancelled' %}is-cancelled{% endif %}">
+            <span class="repair-step-marker">{% if repair.status == 'completed' %}✓{% elif repair.status == 'cancelled' %}×{% else %}3{% endif %}</span>
+            <span>{% if repair.status == 'cancelled' %}{% if request.LANGUAGE_CODE == 'en' %}Cancelled{% else %}ยกเลิก{% endif %}{% else %}{% if request.LANGUAGE_CODE == 'en' %}Completed{% else %}เสร็จสิ้น{% endif %}{% endif %}</span>
+        </div>
+    </section>
+
+    {% if repair.status == 'completed' %}
+    <section class="detail-card repair-rating-card" aria-labelledby="repair-rating-title">
+        <div class="rating-copy">
+            <span class="detail-card-kicker">{% if request.LANGUAGE_CODE == 'en' %}REPAIR FEEDBACK{% else %}ความคิดเห็นต่องานซ่อม{% endif %}</span>
+            <h2 id="repair-rating-title">{% if request.LANGUAGE_CODE == 'en' %}How was the repair?{% else %}พอใจกับงานซ่อมแค่ไหน?{% endif %}</h2>
+            <p>{% if request.LANGUAGE_CODE == 'en' %}Your feedback helps us improve dorm services.{% else %}ความคิดเห็นของคุณช่วยให้เราพัฒนาการดูแลหอพัก{% endif %}</p>
+        </div>
+        {% if repair.rating %}
+        <div class="repair-rating-result" aria-label="{% if request.LANGUAGE_CODE == 'en' %}Rated {{ repair.rating }} out of 5 stars{% else %}ให้คะแนน {{ repair.rating }} จาก 5 ดาว{% endif %}">
+            <span class="rating-stars" aria-hidden="true">{% for value in '12345' %}{% if forloop.counter <= repair.rating %}★{% else %}☆{% endif %}{% endfor %}</span>
+            <strong>{{ repair.rating }}/5</strong>
+            <span>{% if request.LANGUAGE_CODE == 'en' %}Thank you for your feedback{% else %}ขอบคุณสำหรับความคิดเห็น{% endif %}</span>
+        </div>
+        {% elif request.user == repair.reported_by %}
+        <form class="repair-rating-form" method="post" action="{% url 'repair_rating' repair.pk %}">
+            {% csrf_token %}
+            <fieldset class="rating-fieldset">
+                <legend>{{ rating_form.rating.label }}</legend>
+                <div class="rating-options">
+                    {% for radio in rating_form.rating %}
+                    <label class="rating-option" title="{% if request.LANGUAGE_CODE == 'en' %}{{ radio.choice_label }} out of 5 stars{% else %}{{ radio.choice_label }} จาก 5 ดาว{% endif %}">
+                        {{ radio.tag }}
+                        <span aria-hidden="true">★</span>
+                        <span class="visually-hidden">{% if request.LANGUAGE_CODE == 'en' %}{{ radio.choice_label }} stars{% else %}{{ radio.choice_label }} ดาว{% endif %}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                {% if rating_form.rating.errors %}<small class="field-error">{{ rating_form.rating.errors|striptags }}</small>{% endif %}
+            </fieldset>
+            <button class="rating-submit" type="submit">{% if request.LANGUAGE_CODE == 'en' %}Submit rating{% else %}ส่งคะแนน{% endif %}</button>
+        </form>
+        {% else %}
+        <p class="rating-pending">{% if request.LANGUAGE_CODE == 'en' %}The resident can rate this repair once.{% else %}ผู้แจ้งสามารถให้คะแนนรายการนี้ได้หนึ่งครั้ง{% endif %}</p>
+        {% endif %}
+    </section>
+    {% endif %}
+
+    <div class="detail-stack">
+        <article class="detail-card problem-card">
+            <header class="detail-card-heading">
+                <div>
+                    <span class="detail-card-kicker">{% if request.LANGUAGE_CODE == 'en' %}REQUEST INFORMATION{% else %}ข้อมูลรายการ{% endif %}</span>
+                    <h2>{% if request.LANGUAGE_CODE == 'en' %}Problem details{% else %}รายละเอียดปัญหา{% endif %}</h2>
+                </div>
+                <form method="post" action="{% url 'repair_delete' repair.pk %}" class="delete-repair-form" data-delete-repair-form>
+                    {% csrf_token %}
+                    <button class="delete-repair-button" type="button" data-open-delete-dialog>
+                        <span aria-hidden="true">⌫</span>{% if request.LANGUAGE_CODE == 'en' %}Delete request{% else %}ลบรายการ{% endif %}
+                    </button>
+                </form>
+            </header>
+            <p class="problem-description">{{ repair.description|linebreaksbr }}</p>
+            {% if repair.image %}
+            <figure class="repair-image-wrap">
+                <img src="{{ repair.image.url }}" alt="{% if request.LANGUAGE_CODE == 'en' %}Photo attached to repair request{% else %}รูปภาพประกอบรายการแจ้งซ่อม{% endif %}" class="repair-image">
+            </figure>
+            {% endif %}
+            <dl class="repair-metadata">
+                <div>
+                    <dt>{% if request.LANGUAGE_CODE == 'en' %}Category{% else %}หมวดหมู่{% endif %}</dt>
+                    <dd>
+                        {% if repair.category == 'electricity' %}{% if request.LANGUAGE_CODE == 'en' %}Electricity{% else %}ไฟฟ้า{% endif %}
+                        {% elif repair.category == 'plumbing' %}{% if request.LANGUAGE_CODE == 'en' %}Plumbing{% else %}ประปา{% endif %}
+                        {% elif repair.category == 'furniture' %}{% if request.LANGUAGE_CODE == 'en' %}Furniture{% else %}เฟอร์นิเจอร์{% endif %}
+                        {% elif repair.category == 'internet' %}{% if request.LANGUAGE_CODE == 'en' %}Internet{% else %}อินเทอร์เน็ต{% endif %}
+                        {% else %}{% if request.LANGUAGE_CODE == 'en' %}Other{% else %}อื่น ๆ{% endif %}{% endif %}
+                    </dd>
+                </div>
+                <div>
+                    <dt>{% if request.LANGUAGE_CODE == 'en' %}Location{% else %}สถานที่{% endif %}</dt>
+                    <dd>{{ repair.location }}</dd>
+                </div>
+                {% if repair.assigned_to %}
+                <div>
+                    <dt>{% if request.LANGUAGE_CODE == 'en' %}Assigned to{% else %}ผู้รับผิดชอบ{% endif %}</dt>
+                    <dd>{{ repair.assigned_to.get_full_name|default:repair.assigned_to.username }}</dd>
+                </div>
+                {% endif %}
+                <div>
+                    <dt>{% if request.LANGUAGE_CODE == 'en' %}Last updated{% else %}อัปเดตล่าสุด{% endif %}</dt>
+                    <dd>{{ repair.updated_at|date:"DATETIME_FORMAT" }}</dd>
+                </div>
+            </dl>
+        </article>
+
+        {% if request.user.is_supervisor %}
+        <article class="detail-card management-card">
+            <header class="detail-card-heading">
+                <div>
+                    <span class="detail-card-kicker">{% if request.LANGUAGE_CODE == 'en' %}SUPERVISOR TOOLS{% else %}เครื่องมือผู้ดูแล{% endif %}</span>
+                    <h2>{% if request.LANGUAGE_CODE == 'en' %}Manage request{% else %}จัดการรายการ{% endif %}</h2>
+                </div>
+            </header>
+            <form method="post" action="{% url 'repair_update' repair.pk %}" class="repair-update-form">
+                {% csrf_token %}
+                {% for field in update_form %}
+                <label>
+                    {% if field.name == 'status' %}{% if request.LANGUAGE_CODE == 'en' %}Status{% else %}สถานะ{% endif %}
+                    {% elif field.name == 'supervisor_note' %}{% if request.LANGUAGE_CODE == 'en' %}Supervisor note{% else %}หมายเหตุจากผู้ดูแล{% endif %}
+                    {% else %}{% if request.LANGUAGE_CODE == 'en' %}Assigned to{% else %}ผู้รับผิดชอบ{% endif %}{% endif %}
+                    {{ field }}
+                    {% if field.errors %}<small class="field-error">{{ field.errors|striptags }}</small>{% endif %}
+                </label>
+                {% endfor %}
+                <button class="primary-button" type="submit">{% if request.LANGUAGE_CODE == 'en' %}Save update{% else %}บันทึกการอัปเดต{% endif %}<span aria-hidden="true">→</span></button>
+            </form>
+        </article>
+        {% else %}
+        <article class="detail-card note-card">
+            <header class="detail-card-heading">
+                <div>
+                    <span class="detail-card-kicker">{% if request.LANGUAGE_CODE == 'en' %}LATEST UPDATE{% else %}ความคืบหน้าล่าสุด{% endif %}</span>
+                    <h2>{% if request.LANGUAGE_CODE == 'en' %}Supervisor note{% else %}หมายเหตุจากผู้ดูแล{% endif %}</h2>
+                </div>
+            </header>
+            {% if repair.supervisor_note %}
+            <p class="supervisor-note">{{ repair.supervisor_note|linebreaksbr }}</p>
+            {% else %}
+            <p class="empty-note">{% if request.LANGUAGE_CODE == 'en' %}No additional notes yet. We’ll share updates here as soon as they’re available.{% else %}ยังไม่มีหมายเหตุเพิ่มเติม เมื่อมีความคืบหน้า เราจะแจ้งให้ทราบที่นี่{% endif %}</p>
+            {% endif %}
+        </article>
+        {% endif %}
+
+        <article class="detail-card activity-card">
+            <header class="detail-card-heading">
+                <div>
+                    <span class="detail-card-kicker">{% if request.LANGUAGE_CODE == 'en' %}REPAIR ACTIVITY{% else %}ความเคลื่อนไหวรายการ{% endif %}</span>
+                    <h2>{% if request.LANGUAGE_CODE == 'en' %}Updates & comments{% else %}อัปเดตและความคิดเห็น{% endif %}</h2>
+                </div>
+                <span class="activity-count">{{ comments|length }}</span>
+            </header>
+            {% if comments %}
+            <ol class="activity-list">
+                {% for comment in comments %}
+                <li class="activity-item">
+                    <span class="activity-avatar" aria-hidden="true">{{ comment.author.get_full_name|default:comment.author.username|slice:':1'|upper }}</span>
+                    <div class="activity-entry">
+                        <div class="activity-entry-heading">
+                            <strong>{{ comment.author.get_full_name|default:comment.author.username }}</strong>
+                            <span class="activity-author-role">{% if comment.author.is_supervisor %}{% if request.LANGUAGE_CODE == 'en' %}Technician / supervisor{% else %}ช่าง / ผู้ดูแล{% endif %}{% elif request.LANGUAGE_CODE == 'en' %}Resident{% else %}ผู้พักอาศัย{% endif %}</span>
+                            <time datetime="{{ comment.created_at|date:'c' }}">{{ comment.created_at|date:"DATETIME_FORMAT" }}</time>
+                        </div>
+                        <p>{{ comment.body|linebreaksbr }}</p>
+                    </div>
+                </li>
+                {% endfor %}
+            </ol>
+            {% else %}
+            <p class="empty-note activity-empty">{% if request.LANGUAGE_CODE == 'en' %}No updates yet. Add a comment to keep everyone informed.{% else %}ยังไม่มีความเคลื่อนไหว แสดงความคิดเห็นเพื่อแจ้งข้อมูลให้ทุกคนทราบได้เลย{% endif %}</p>
+            {% endif %}
+            <form class="activity-form" method="post" action="{% url 'repair_comment' repair.pk %}">
+                {% csrf_token %}
+                <label class="activity-input-label" for="{{ comment_form.body.id_for_label }}">{{ comment_form.body.label }}</label>
+                {{ comment_form.body }}
+                {% if comment_form.body.errors %}<small class="field-error">{{ comment_form.body.errors|striptags }}</small>{% endif %}
+                <div class="activity-form-footer">
+                    <span>{% if request.LANGUAGE_CODE == 'en' %}Visible to the resident and dorm team{% else %}ผู้พักและทีมดูแลหอพักจะเห็นข้อความนี้{% endif %}</span>
+                    <button class="primary-button" type="submit">{% if request.LANGUAGE_CODE == 'en' %}Post update{% else %}ส่งความคิดเห็น{% endif %}<span aria-hidden="true">→</span></button>
+                </div>
+            </form>
+        </article>
+    </div>
+
+    <dialog class="delete-confirm-dialog" data-delete-dialog aria-labelledby="delete-dialog-title">
+        <form method="dialog" class="dialog-close-form">
+            <button class="dialog-close" aria-label="{% if request.LANGUAGE_CODE == 'en' %}Close dialog{% else %}ปิดหน้าต่าง{% endif %}">×</button>
+        </form>
+        <span class="delete-dialog-icon" aria-hidden="true">!</span>
+        <h2 id="delete-dialog-title">{% if request.LANGUAGE_CODE == 'en' %}Delete this request?{% else %}ลบรายการแจ้งซ่อมนี้หรือไม่?{% endif %}</h2>
+        <p>{% if request.LANGUAGE_CODE == 'en' %}This action cannot be undone. The repair request and its details will be permanently deleted.{% else %}การดำเนินการนี้ย้อนกลับไม่ได้ รายการแจ้งซ่อมและรายละเอียดทั้งหมดจะถูกลบถาวร{% endif %}</p>
+        <div class="delete-dialog-actions">
+            <button class="dialog-cancel" type="button" data-close-delete-dialog>{% if request.LANGUAGE_CODE == 'en' %}Keep request{% else %}เก็บรายการไว้{% endif %}</button>
+            <button class="dialog-confirm-delete" type="button" data-confirm-delete>{% if request.LANGUAGE_CODE == 'en' %}Delete permanently{% else %}ยืนยันลบถาวร{% endif %}</button>
+        </div>
+    </dialog>
+</section>
+
+<script>
+    const deleteDialog = document.querySelector('[data-delete-dialog]');
+    const deleteForm = document.querySelector('[data-delete-repair-form]');
+
+    document.querySelector('[data-open-delete-dialog]')?.addEventListener('click', () => {
+        deleteDialog?.showModal();
+    });
+
+    document.querySelector('[data-close-delete-dialog]')?.addEventListener('click', () => {
+        deleteDialog?.close();
+    });
+
+    document.querySelector('[data-confirm-delete]')?.addEventListener('click', () => {
+        deleteForm?.requestSubmit();
+    });
+</script>
+{% endblock %}

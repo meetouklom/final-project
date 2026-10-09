@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{% if request.LANGUAGE_CODE == 'en' %}Dashboard · DormFix{% else %}แดชบอร์ด · DormFix{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="dashboard-page">
+    <header class="dashboard-heading">
+        <div>
+            <span class="eyebrow">{% if request.user.is_supervisor %}{% if request.LANGUAGE_CODE == 'en' %}SUPERVISOR CONSOLE{% else %}สำหรับผู้ดูแลหอพัก{% endif %}{% else %}{% if request.LANGUAGE_CODE == 'en' %}MY RESIDENCE{% else %}ภาพรวมของฉัน{% endif %}{% endif %}</span>
+            <h1>{% if request.user.is_supervisor %}{% if request.LANGUAGE_CODE == 'en' %}Repair overview{% else %}ภาพรวมงานแจ้งซ่อม{% endif %}{% else %}{% if request.LANGUAGE_CODE == 'en' %}Hello, {{ request.user.first_name|default:request.user.username }}{% else %}สวัสดี, {{ request.user.first_name|default:request.user.username }}{% endif %}{% endif %}</h1>
+            <p>{% if request.user.is_supervisor %}{% if request.LANGUAGE_CODE == 'en' %}See every repair request and its progress at a glance.{% else %}ติดตามรายการแจ้งซ่อมและความคืบหน้าได้ในหน้าเดียว{% endif %}{% else %}{% if request.LANGUAGE_CODE == 'en' %}A clear overview of your repair requests.{% else %}ดูภาพรวมและติดตามความคืบหน้ารายการแจ้งซ่อมของคุณ{% endif %}{% endif %}</p>
+        </div>
+        <a class="primary-button" href="{% url 'repair_create' %}">
+            <span aria-hidden="true">＋</span>{% if request.LANGUAGE_CODE == 'en' %}New request{% else %}แจ้งซ่อมใหม่{% endif %}
+        </a>
+    </header>
+
+    <section class="dashboard-stats" aria-label="{% if request.LANGUAGE_CODE == 'en' %}Repair summary{% else %}สรุปรายการแจ้งซ่อม{% endif %}">
+        <article class="dashboard-stat stat-total">
+            <span class="stat-icon" aria-hidden="true">▤</span>
+            <div><span>{% if request.LANGUAGE_CODE == 'en' %}All requests{% else %}รายการทั้งหมด{% endif %}</span><strong>{{ stats.total }}</strong></div>
+            <small>{% if request.LANGUAGE_CODE == 'en' %}Recorded requests{% else %}รายการที่บันทึกไว้{% endif %}</small>
+        </article>
+        <article class="dashboard-stat stat-open">
+            <span class="stat-icon" aria-hidden="true">◷</span>
+            <div><span>{% if request.LANGUAGE_CODE == 'en' %}In progress{% else %}กำลังดำเนินการ{% endif %}</span><strong>{{ stats.open }}</strong></div>
+            <small>{% if request.LANGUAGE_CODE == 'en' %}Still being handled{% else %}อยู่ระหว่างการดูแล{% endif %}</small>
+        </article>
+        <article class="dashboard-stat stat-waiting">
+            <span class="stat-icon" aria-hidden="true">…</span>
+            <div><span>{% if request.LANGUAGE_CODE == 'en' %}Waiting for parts{% else %}รออะไหล่{% endif %}</span><strong>{{ stats.waiting }}</strong></div>
+            <small>{% if request.LANGUAGE_CODE == 'en' %}Updates will follow{% else %}จะแจ้งความคืบหน้าให้ทราบ{% endif %}</small>
+        </article>
+        <article class="dashboard-stat stat-completed">
+            <span class="stat-icon" aria-hidden="true">✓</span>
+            <div><span>{% if request.LANGUAGE_CODE == 'en' %}Completed{% else %}เสร็จสิ้นแล้ว{% endif %}</span><strong>{{ stats.completed }}</strong></div>
+            <small>{% if request.LANGUAGE_CODE == 'en' %}Successfully resolved{% else %}แก้ไขเรียบร้อยแล้ว{% endif %}</small>
+        </article>
+    </section>
+
+    {% if member_stats %}
+    <section class="member-overview" aria-labelledby="member-overview-title">
+        <header class="member-overview-heading">
+            <div>
+                <span class="eyebrow">{% if request.LANGUAGE_CODE == 'en' %}MEMBERS{% else %}สมาชิก{% endif %}</span>
+                <h2 id="member-overview-title">{% if request.LANGUAGE_CODE == 'en' %}Account overview{% else %}ภาพรวมบัญชีผู้ใช้{% endif %}</h2>
+                <p>{% if request.LANGUAGE_CODE == 'en' %}A clear summary of active accounts, deactivated accounts, and member types.{% else %}สรุปจำนวนบัญชีที่ใช้งาน ปิดใช้งาน และแยกตามประเภทสมาชิก{% endif %}</p>
+            </div>
+            <a class="member-management-link" href="{% url 'account_management' %}">
+                {% if request.LANGUAGE_CODE == 'en' %}Manage accounts{% else %}จัดการบัญชี{% endif %}<span aria-hidden="true">→</span>
+            </a>
+        </header>
+        <div class="member-stat-grid">
+            <article class="member-stat member-stat-total">
+                <span>{% if request.LANGUAGE_CODE == 'en' %}All accounts{% else %}บัญชีทั้งหมด{% endif %}</span>
+                <strong>{{ member_stats.total }}</strong>
+            </article>
+            <article class="member-stat member-stat-active">
+                <span>{% if request.LANGUAGE_CODE == 'en' %}Active{% else %}กำลังใช้งาน{% endif %}</span>
+                <strong>{{ member_stats.active }}</strong>
+            </article>
+            <article class="member-stat member-stat-inactive">
+                <span>{% if request.LANGUAGE_CODE == 'en' %}Deactivated{% else %}ปิดใช้งาน / พ้นสภาพ{% endif %}</span>
+                <strong>{{ member_stats.inactive }}</strong>
+            </article>
+            <article class="member-stat member-stat-roles">
+                <span>{% if request.LANGUAGE_CODE == 'en' %}Accounts by type{% else %}แยกตามประเภทบัญชี{% endif %}</span>
+                <div class="member-role-breakdown">
+                    <div><span>{% if request.LANGUAGE_CODE == 'en' %}Residents{% else %}ผู้พักอาศัย{% endif %}</span><strong>{{ member_stats.residents }}</strong></div>
+                    <div><span>{% if request.LANGUAGE_CODE == 'en' %}Supervisors{% else %}ผู้ดูแล{% endif %}</span><strong>{{ member_stats.supervisors }}</strong></div>
+                    <div><span>{% if request.LANGUAGE_CODE == 'en' %}Admins{% else %}แอดมิน{% endif %}</span><strong>{{ member_stats.administrators }}</strong></div>
+                </div>
+            </article>
+        </div>
+    </section>
+    {% endif %}
+
+    <section class="dashboard-overview">
+        <article class="dashboard-card status-card">
+            <header class="dashboard-card-heading">
+                <div>
+                    <h2>{% if request.LANGUAGE_CODE == 'en' %}Status overview{% else %}สรุปตามสถานะ{% endif %}</h2>
+                    <p>{% if request.LANGUAGE_CODE == 'en' %}A quick look at where each request stands.{% else %}ตรวจดูสถานะของทุกรายการได้อย่างรวดเร็ว{% endif %}</p>
+                </div>
+                <span class="card-heading-icon" aria-hidden="true">▥</span>
+            </header>
+            {% for item in status_breakdown %}
+            <div class="status-breakdown">
+                <div class="status-breakdown-label">
+                    <span class="status-dot status-dot-{{ item.key }}"></span>
+                    <span>{% if item.key == 'received' %}{% if request.LANGUAGE_CODE == 'en' %}Received{% else %}รับแจ้งแล้ว{% endif %}{% elif item.key == 'in_progress' %}{% if request.LANGUAGE_CODE == 'en' %}In progress{% else %}กำลังดำเนินการ{% endif %}{% elif item.key == 'waiting' %}{% if request.LANGUAGE_CODE == 'en' %}Waiting for parts{% else %}รออะไหล่{% endif %}{% elif item.key == 'completed' %}{% if request.LANGUAGE_CODE == 'en' %}Completed{% else %}เสร็จสิ้น{% endif %}{% else %}{% if request.LANGUAGE_CODE == 'en' %}Cancelled{% else %}ยกเลิก{% endif %}{% endif %}</span>
+                    <strong>{{ item.count }}</strong>
+                </div>
+                <div class="status-track"><span class="status-fill status-fill-{{ item.key }}" data-percent="{{ item.percent }}"></span></div>
+            </div>
+            {% endfor %}
+        </article>
+
+        <article class="dashboard-card completion-card">
+            <header class="dashboard-card-heading">
+                <div>
+                    <h2>{% if request.LANGUAGE_CODE == 'en' %}Resolution progress{% else %}ความคืบหน้าการแก้ไข{% endif %}</h2>
+                    <p>{% if request.LANGUAGE_CODE == 'en' %}Share of requests marked complete.{% else %}สัดส่วนรายการที่ดำเนินการเสร็จสิ้น{% endif %}</p>
+                </div>
+            </header>
+            <div class="completion-ring" data-completion="{{ stats.completion_percent }}">
+                <div><strong>{{ stats.completion_percent }}%</strong><span>{% if request.LANGUAGE_CODE == 'en' %}completed{% else %}เสร็จสิ้น{% endif %}</span></div>
+            </div>
+            <p class="completion-note">{% if request.LANGUAGE_CODE == 'en' %}{{ stats.completed }} of {{ stats.total }} requests completed{% else %}เสร็จแล้ว {{ stats.completed }} จาก {{ stats.total }} รายการ{% endif %}</p>
+        </article>
+    </section>
+
+    <section class="dashboard-card recent-card">
+        <header class="dashboard-card-heading recent-heading">
+            <div>
+                <h2>{% if request.LANGUAGE_CODE == 'en' %}Recent requests{% else %}รายการแจ้งซ่อมล่าสุด{% endif %}</h2>
+                <p>{% if request.LANGUAGE_CODE == 'en' %}The latest updates from your residence.{% else %}ติดตามรายการที่เพิ่งแจ้งเข้ามา{% endif %}</p>
+            </div>
+            <span class="request-count" data-request-count data-items-label="{% if request.LANGUAGE_CODE == 'en' %}requests{% else %}รายการ{% endif %}">{{ stats.total }} {% if request.LANGUAGE_CODE == 'en' %}requests{% else %}รายการ{% endif %}</span>
+        </header>
+        {% if repair_requests %}
+        <div class="dashboard-request-filters" data-request-filters>
+            <label class="dashboard-request-search">
+                <span>{% if request.LANGUAGE_CODE == 'en' %}Search{% else %}ค้นหา{% endif %}</span>
+                <input type="search" data-request-search
+                    placeholder="{% if request.LANGUAGE_CODE == 'en' %}Search requests...{% else %}ค้นหารายการแจ้งซ่อม...{% endif %}">
+            </label>
+            <label class="dashboard-request-status-filter">
+                <span>{% if request.LANGUAGE_CODE == 'en' %}Status{% else %}สถานะ{% endif %}</span>
+                <select data-request-status-filter>
+                    <option value="">{% if request.LANGUAGE_CODE == 'en' %}All statuses{% else %}ทุกสถานะ{% endif %}</option>
+                    <option value="received">{% if request.LANGUAGE_CODE == 'en' %}Received{% else %}รับแจ้งแล้ว{% endif %}</option>
+                    <option value="in_progress">{% if request.LANGUAGE_CODE == 'en' %}In progress{% else %}กำลังดำเนินการ{% endif %}</option>
+                    <option value="waiting">{% if request.LANGUAGE_CODE == 'en' %}Waiting for parts{% else %}รออะไหล่{% endif %}</option>
+                    <option value="completed">{% if request.LANGUAGE_CODE == 'en' %}Completed{% else %}เสร็จสิ้น{% endif %}</option>
+                    <option value="cancelled">{% if request.LANGUAGE_CODE == 'en' %}Cancelled{% else %}ยกเลิก{% endif %}</option>
+                </select>
+            </label>
+            <button class="dashboard-clear-filters" type="button" data-clear-request-filters>
+                {% if request.LANGUAGE_CODE == 'en' %}Clear filters{% else %}ล้างตัวกรอง{% endif %}
+            </button>
+        </div>
+        {% endif %}
+        <div class="recent-table{% if request.user.is_supervisor %} has-ai-actions{% endif %}" role="table" aria-label="{% if request.LANGUAGE_CODE == 'en' %}Recent repair requests{% else %}รายการแจ้งซ่อมล่าสุด{% endif %}">
+            <div class="recent-table-header" role="row">
+                <span role="columnheader">{% if request.LANGUAGE_CODE == 'en' %}REQUEST{% else %}รายการ{% endif %}</span>
+                <span role="columnheader">{% if request.LANGUAGE_CODE == 'en' %}LOCATION{% else %}สถานที่{% endif %}</span>
+                <span role="columnheader">{% if request.LANGUAGE_CODE == 'en' %}REPORTED{% else %}วันที่แจ้ง{% endif %}</span>
+                <span role="columnheader">{% if request.LANGUAGE_CODE == 'en' %}STATUS{% else %}สถานะ{% endif %}</span>
+                {% if request.user.is_supervisor %}<span role="columnheader">{% if request.LANGUAGE_CODE == 'en' %}AI ASSIST{% else %}ผู้ช่วย AI{% endif %}</span>{% endif %}
+                <span aria-hidden="true"></span>
+            </div>
+        {% for item in repair_requests %}
+        <div class="dashboard-request{% if request.user.is_supervisor %} has-ai-actions{% endif %}" role="row" data-request-row data-request-status="{{ item.status }}">
+            <a class="dashboard-request-main" role="cell" href="{% url 'repair_detail' item.pk %}">
+                <strong>{{ item.title }}</strong>
+                {% if request.user.is_supervisor %}<small>{{ item.reported_by.get_full_name|default:item.reported_by.username }}</small>{% endif %}
+            </a>
+            <span class="dashboard-request-location" role="cell">{{ item.location }}</span>
+            <span class="dashboard-request-date" role="cell">{{ item.created_at|date:'d M Y' }}</span>
+            <span class="dashboard-request-status" role="cell"><span class="status status-{{ item.status }}">{% if request.LANGUAGE_CODE == 'en' %}{{ item.get_status_display }}{% else %}{% if item.status == 'received' %}รับแจ้งแล้ว{% elif item.status == 'in_progress' %}กำลังดำเนินการ{% elif item.status == 'waiting' %}รออะไหล่{% elif item.status == 'completed' %}เสร็จสิ้น{% else %}ยกเลิก{% endif %}{% endif %}</span></span>
+            {% if request.user.is_supervisor %}
+            <form class="dashboard-ai-form" method="post" action="{% url 'repair_ai_analyze' item.pk %}" role="cell">
+                {% csrf_token %}
+                <button class="dashboard-ai-button" type="submit">
+                    <span aria-hidden="true">✦</span>{% if request.LANGUAGE_CODE == 'en' %}AI Analyze{% else %}วิเคราะห์ AI{% endif %}
+                </button>
+            </form>
+            {% endif %}
+            <a class="dashboard-request-arrow" role="cell" aria-label="{% if request.LANGUAGE_CODE == 'en' %}Open request details{% else %}เปิดรายละเอียดคำร้อง{% endif %}" href="{% url 'repair_detail' item.pk %}">→</a>
+        </div>
+        {% empty %}
+        <div class="dashboard-empty">
+            <span aria-hidden="true">▤</span>
+            <strong>{% if request.LANGUAGE_CODE == 'en' %}No repair requests yet{% else %}ยังไม่มีรายการแจ้งซ่อม{% endif %}</strong>
+            <p>{% if request.LANGUAGE_CODE == 'en' %}When you report an issue, its progress will appear here.{% else %}เมื่อแจ้งปัญหาแล้ว คุณจะติดตามความคืบหน้าได้จากที่นี่{% endif %}</p>
+            <a class="primary-button" href="{% url 'repair_create' %}">{% if request.LANGUAGE_CODE == 'en' %}Create your first request{% else %}เริ่มแจ้งซ่อมรายการแรก{% endif %}<span aria-hidden="true">→</span></a>
+        </div>
+        {% endfor %}
+            {% if repair_requests %}
+            <div class="dashboard-filter-empty" data-filter-empty role="status" hidden>
+                {% if request.LANGUAGE_CODE == 'en' %}No matching requests. Clear the filters to see all requests.{% else %}ไม่พบรายการที่ตรงกัน ล้างตัวกรองเพื่อดูรายการทั้งหมด{% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </section>
+</section>
+<script>
+    document.querySelectorAll('.status-fill[data-percent]').forEach((bar) => {
+        const percent = Number(bar.dataset.percent);
+        if (Number.isFinite(percent)) {
+            bar.style.width = `${Math.min(100, Math.max(0, percent))}%`;
+        }
+    });
+
+    const completionRing = document.querySelector('.completion-ring[data-completion]');
+    if (completionRing) {
+        const percent = Number(completionRing.dataset.completion);
+        if (Number.isFinite(percent)) {
+            completionRing.style.setProperty('--completion', `${Math.min(100, Math.max(0, percent))}%`);
+        }
+    }
+</script>
+{% if repair_requests %}
+<script>
+    (() => {
+        const filterPanel = document.querySelector('[data-request-filters]');
+        if (!filterPanel) return;
+
+        const searchInput = filterPanel.querySelector('[data-request-search]');
+        const statusFilter = filterPanel.querySelector('[data-request-status-filter]');
+        const clearButton = filterPanel.querySelector('[data-clear-request-filters]');
+        const rows = Array.from(document.querySelectorAll('[data-request-row]'));
+        const emptyMessage = document.querySelector('[data-filter-empty]');
+        const countLabel = document.querySelector('[data-request-count]');
+
+        const applyFilters = () => {
+            const query = searchInput.value.trim().toLocaleLowerCase();
+            const selectedStatus = statusFilter.value;
+            let visibleCount = 0;
+
+            rows.forEach((row) => {
+                const matchesQuery = row.textContent.toLocaleLowerCase().includes(query);
+                const matchesStatus = !selectedStatus || row.dataset.requestStatus === selectedStatus;
+                const isVisible = matchesQuery && matchesStatus;
+                row.hidden = !isVisible;
+                if (isVisible) visibleCount += 1;
+            });
+
+            emptyMessage.hidden = visibleCount > 0;
+            countLabel.textContent = `${visibleCount} ${countLabel.dataset.itemsLabel}`;
+        };
+
+        searchInput.addEventListener('input', applyFilters);
+        statusFilter.addEventListener('change', applyFilters);
+        clearButton.addEventListener('click', () => {
+            searchInput.value = '';
+            statusFilter.value = '';
+            applyFilters();
+            searchInput.focus();
+        });
+    })();
+</script>
+{% endif %}
+{% endblock %}

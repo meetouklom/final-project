@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{% if request.LANGUAGE_CODE == 'en' %}New repair · DormFix{% else %}แจ้งซ่อม · DormFix{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="form-page repair-form-page">
+    <a class="back-link detail-back-link" href="{% url 'dashboard' %}">
+        <span aria-hidden="true">←</span>{% if request.LANGUAGE_CODE == 'en' %}Back to dashboard{% else %}กลับแดชบอร์ด{% endif %}
+    </a>
+    <span class="eyebrow">{% if request.LANGUAGE_CODE == 'en' %}NEW REQUEST{% else %}แจ้งปัญหาใหม่{% endif %}</span>
+    <h1>{% if request.LANGUAGE_CODE == 'en' %}Report a repair{% else %}แจ้งซ่อม{% endif %}</h1>
+    <p class="muted">{% if request.LANGUAGE_CODE == 'en' %}Share a few details and our dorm team will help you as soon as possible.{% else %}แจ้งรายละเอียดปัญหา เพื่อให้ทีมดูแลหอพักช่วยเหลือคุณได้รวดเร็วยิ่งขึ้น{% endif %}</p>
+
+    <div class="form-card wide repair-form-card">
+        <form method="post" enctype="multipart/form-data" class="repair-request-form">
+            {% csrf_token %}
+            {% if form.non_field_errors %}<div class="error-box">{{ form.non_field_errors }}</div>{% endif %}
+            {% for field in form %}
+            {% if field.name == 'image' %}
+            <div class="repair-image-field">
+                <span class="repair-field-label">{{ field.label }}</span>
+                <div class="file-upload-control" data-file-upload
+                    data-invalid-text="{% if request.LANGUAGE_CODE == 'en' %}Please choose an image file.{% else %}กรุณาเลือกไฟล์รูปภาพ{% endif %}">
+                    <label class="file-dropzone" data-file-dropzone>
+                        {{ field }}
+                        <span class="file-dropzone-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 15.5v3A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </span>
+                        <span class="file-dropzone-copy">
+                            <strong>{% if request.LANGUAGE_CODE == 'en' %}Drag and drop your image here{% else %}ลากรูปภาพมาวางที่นี่{% endif %}</strong>
+                            <span class="file-dropzone-prompt">{% if request.LANGUAGE_CODE == 'en' %}or <span>browse files</span>{% else %}หรือ <span>เลือกไฟล์จากอุปกรณ์</span>{% endif %}</span>
+                            <small>{% if request.LANGUAGE_CODE == 'en' %}PNG, JPG or WebP · Optional{% else %}รองรับ PNG, JPG หรือ WebP · ไม่บังคับ{% endif %}</small>
+                        </span>
+                    </label>
+                    <div class="file-preview" data-file-preview hidden aria-live="polite">
+                        <img class="file-preview-image" data-preview-image alt="{% if request.LANGUAGE_CODE == 'en' %}Selected image preview{% else %}ตัวอย่างรูปภาพที่เลือก{% endif %}">
+                        <div class="file-preview-meta">
+                            <strong data-preview-name></strong>
+                            <span data-preview-size></span>
+                        </div>
+                        <button class="file-preview-remove" type="button" data-remove-image aria-label="{% if request.LANGUAGE_CODE == 'en' %}Remove selected image{% else %}นำรูปภาพที่เลือกออก{% endif %}" title="{% if request.LANGUAGE_CODE == 'en' %}Remove image{% else %}นำรูปภาพออก{% endif %}">×</button>
+                    </div>
+                </div>
+                <small class="field-error file-dropzone-error" data-file-error role="alert" hidden></small>
+                {% if field.errors %}<small class="field-error">{{ field.errors|striptags }}</small>{% endif %}
+            </div>
+            {% else %}
+            <label class="repair-form-field">
+                <span>{{ field.label }}{% if field.field.required %}<span class="required-marker" aria-hidden="true">*</span>{% endif %}</span>
+                {{ field }}
+                {% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}
+                {% if field.errors %}<small class="field-error">{{ field.errors|striptags }}</small>{% endif %}
+            </label>
+            {% endif %}
+            {% endfor %}
+            <div class="repair-form-actions">
+                <span>{% if request.LANGUAGE_CODE == 'en' %}Fields marked as required must be completed.{% else %}กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน{% endif %}</span>
+                <button class="primary-button" type="submit">{% if request.LANGUAGE_CODE == 'en' %}Submit repair request{% else %}ส่งเรื่องแจ้งซ่อม{% endif %}<span aria-hidden="true">→</span></button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script>
+    document.querySelectorAll('[data-file-upload]').forEach((upload) => {
+        const dropzone = upload.querySelector('[data-file-dropzone]');
+        const input = upload.querySelector('[data-file-input]');
+        const preview = upload.querySelector('[data-file-preview]');
+        const previewImage = upload.querySelector('[data-preview-image]');
+        const previewName = upload.querySelector('[data-preview-name]');
+        const previewSize = upload.querySelector('[data-preview-size]');
+        const removeButton = upload.querySelector('[data-remove-image]');
+        const fileError = upload.parentElement.querySelector('[data-file-error]');
+        let previewUrl = null;
+
+        const clearPreviewUrl = () => {
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+                previewUrl = null;
+            }
+        };
+
+        const showError = (message) => {
+            fileError.textContent = message;
+            fileError.hidden = false;
+        };
+
+        const showPreview = (file) => {
+            clearPreviewUrl();
+            previewUrl = URL.createObjectURL(file);
+            previewImage.src = previewUrl;
+            previewName.textContent = file.name;
+            previewSize.textContent = `${(file.size / (1024 * 1024)).toFixed(2)} MB`;
+            preview.hidden = false;
+            dropzone.hidden = true;
+            fileError.hidden = true;
+            fileError.textContent = '';
+        };
+
+        const clearSelection = () => {
+            input.value = '';
+            preview.hidden = true;
+            dropzone.hidden = false;
+            previewImage.removeAttribute('src');
+            previewName.textContent = '';
+            previewSize.textContent = '';
+            clearPreviewUrl();
+            fileError.hidden = true;
+            fileError.textContent = '';
+        };
+
+        const acceptFile = (file) => {
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                clearSelection();
+                showError(upload.dataset.invalidText);
+                return;
+            }
+            const transfer = new DataTransfer();
+            transfer.items.add(file);
+            input.files = transfer.files;
+            showPreview(file);
+        };
+
+        input.addEventListener('change', () => {
+            acceptFile(input.files[0]);
+        });
+
+        ['dragenter', 'dragover'].forEach((eventName) => {
+            dropzone.addEventListener(eventName, (event) => {
+                event.preventDefault();
+                dropzone.classList.add('is-dragging');
+            });
+        });
+
+        ['dragleave', 'dragend'].forEach((eventName) => {
+            dropzone.addEventListener(eventName, () => {
+                dropzone.classList.remove('is-dragging');
+            });
+        });
+
+        dropzone.addEventListener('drop', (event) => {
+            event.preventDefault();
+            dropzone.classList.remove('is-dragging');
+            const [file] = event.dataTransfer.files;
+            acceptFile(file);
+        });
+
+        removeButton.addEventListener('click', clearSelection);
+    });
+</script>
+{% endblock %}

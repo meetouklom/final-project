@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{% if request.LANGUAGE_CODE == 'en' %}ER diagram · DormFix{% else %}แผนภาพ ER · DormFix{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="er-diagram-page">
+    <header class="dashboard-heading">
+        <div>
+            <span class="eyebrow">{% if request.LANGUAGE_CODE == 'en' %}ADMINISTRATOR{% else %}สำหรับผู้ดูแลระบบ{% endif %}</span>
+            <h1>{% if request.LANGUAGE_CODE == 'en' %}DormFix ER diagram{% else %}แผนภาพ ER ของ DormFix{% endif %}</h1>
+            <p>{% if request.LANGUAGE_CODE == 'en' %}Database entities and relationships used by the DormFix application.{% else %}โครงสร้างข้อมูลและความสัมพันธ์ระหว่างตารางหลักของระบบ DormFix{% endif %}</p>
+        </div>
+        <a class="page-back-button" href="{% url 'dashboard' %}">
+            <span aria-hidden="true">←</span>{% if request.LANGUAGE_CODE == 'en' %}Back to dashboard{% else %}กลับแดชบอร์ด{% endif %}
+        </a>
+    </header>
+
+    <article class="dashboard-card er-diagram-card">
+        <header class="dashboard-card-heading">
+            <div>
+                <h2>{% if request.LANGUAGE_CODE == 'en' %}Entity relationship overview{% else %}ภาพรวมเอนทิตีและความสัมพันธ์{% endif %}</h2>
+                <p>{% if request.LANGUAGE_CODE == 'en' %}User, repair request, comments, notifications, and account audit history.{% else %}ผู้ใช้ รายการแจ้งซ่อม ความคิดเห็น การแจ้งเตือน และประวัติการจัดการบัญชี{% endif %}</p>
+            </div>
+            <a class="secondary-button" href="{% url 'admin_er_diagram_image' %}" target="_blank" rel="noopener">
+                {% if request.LANGUAGE_CODE == 'en' %}Open image{% else %}เปิดภาพแยก{% endif %}
+            </a>
+        </header>
+        <div class="er-diagram-viewport">
+            <img class="er-diagram-image" src="{% url 'admin_er_diagram_image' %}"
+                alt="{% if request.LANGUAGE_CODE == 'en' %}DormFix entity relationship diagram showing users, repair requests, comments, notifications, and account audit logs{% else %}แผนภาพ ER แสดงตารางผู้ใช้ รายการแจ้งซ่อม ความคิดเห็น การแจ้งเตือน และประวัติการจัดการบัญชีของ DormFix{% endif %}">
+        </div>
+        <p class="er-diagram-note">{% if request.LANGUAGE_CODE == 'en' %}This page is available to Django superusers only. Passwords are stored as hashes, not plain text.{% else %}หน้านี้เปิดได้เฉพาะผู้ดูแลระบบสูงสุด โดยรหัสผ่านจะจัดเก็บในรูปแบบแฮช ไม่ใช่ข้อความธรรมดา{% endif %}</p>
+    </article>
+</section>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{% if request.LANGUAGE_CODE == 'en' %}Register · DormFix{% else %}สมัครสมาชิก · DormFix{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="auth-layout compact">
+    <div class="auth-intro">
+        <span class="eyebrow">{% if request.LANGUAGE_CODE == 'en' %}WELCOME / 02{% else %}ยินดีต้อนรับ / 02{% endif %}</span>
+        {% if request.LANGUAGE_CODE == 'en' %}
+        <h1>Start with a<br><em>better stay.</em></h1>
+        <p>Create an account to report repairs and keep track of your room care.</p>
+        {% else %}
+        <h1>เริ่มต้นการพัก<br><em>ที่ดีกว่าเดิม</em></h1>
+        <p>สร้างบัญชีเพื่อแจ้งซ่อมและติดตามการดูแลห้องพักของคุณ</p>
+        {% endif %}
+    </div>
+    <div class="form-card register-card">
+        <h2>{% if request.LANGUAGE_CODE == 'en' %}Create your account{% else %}สร้างบัญชี{% endif %}</h2>
+        <p class="muted">{% if request.LANGUAGE_CODE == 'en' %}A few details to get started.{% else %}กรอกข้อมูลเล็กน้อยเพื่อเริ่มต้นใช้งาน{% endif %}</p>
+        {% if form.non_field_errors %}<div class="error-box">{{ form.non_field_errors }}</div>{% endif %}
+        <form method="post" class="register-form" data-auth-form>
+            {% csrf_token %}
+            <div class="register-grid">
+                <label class="auth-field">
+                    {{ form.first_name.label }}{{ form.first_name }}
+                    {% if form.first_name.errors %}<small class="field-error">{{ form.first_name.errors|striptags }}</small>{% endif %}
+                </label>
+                <label class="auth-field">
+                    {{ form.last_name.label }}{{ form.last_name }}
+                    {% if form.last_name.errors %}<small class="field-error">{{ form.last_name.errors|striptags }}</small>{% endif %}
+                </label>
+                <label class="auth-field">
+                    {{ form.username.label }}{{ form.username }}
+                    {% if form.username.errors %}<small class="field-error">{{ form.username.errors|striptags }}</small>{% endif %}
+                </label>
+                <label class="auth-field">
+                    {{ form.email.label }}{{ form.email }}
+                    {% if form.email.errors %}<small class="field-error">{{ form.email.errors|striptags }}</small>{% endif %}
+                </label>
+            </div>
+            <fieldset class="role-field">
+                <legend>{{ form.role.label }}</legend>
+                <div class="role-options" role="radiogroup" aria-label="{{ form.role.label }}">
+                    {% for radio in form.role %}
+                    <label class="role-option" for="{{ radio.id_for_label }}">
+                        {{ radio.tag }}
+                        <span class="role-option-copy">
+                            <strong>{{ radio.choice_label }}</strong>
+                            <small>{% if radio.data.value == 'student' %}{% if request.LANGUAGE_CODE == 'en' %}I live in the dorm{% else %}ฉันเป็นผู้พักอาศัย{% endif %}{% else %}{% if request.LANGUAGE_CODE == 'en' %}I manage the dorm{% else %}ฉันเป็นผู้ดูแลหอพัก{% endif %}{% endif %}</small>
+                        </span>
+                    </label>
+                    {% endfor %}
+                </div>
+                {% if form.role.errors %}<small class="field-error">{{ form.role.errors|striptags }}</small>{% endif %}
+            </fieldset>
+            <label class="auth-field">
+                {{ form.room_number.label }}{{ form.room_number }}
+                {% if form.room_number.errors %}<small class="field-error">{{ form.room_number.errors|striptags }}</small>{% endif %}
+            </label>
+            <div class="register-grid">
+                <label class="auth-field">
+                    {{ form.password1.label }}{{ form.password1 }}
+                    {% if form.password1.errors %}<small class="field-error">{{ form.password1.errors|striptags }}</small>{% endif %}
+                </label>
+                <label class="auth-field">
+                    {{ form.password2.label }}{{ form.password2 }}
+                    {% if form.password2.errors %}<small class="field-error">{{ form.password2.errors|striptags }}</small>{% endif %}
+                </label>
+            </div>
+            <button class="primary-button auth-submit-button" type="submit"
+                data-loading-label="{% if request.LANGUAGE_CODE == 'en' %}Creating account...{% else %}กำลังสร้างบัญชี...{% endif %}">
+                <span class="auth-submit-label">{% if request.LANGUAGE_CODE == 'en' %}Create account{% else %}สร้างบัญชี{% endif %}</span>
+                <span class="auth-submit-arrow" aria-hidden="true">→</span>
+                <span class="auth-submit-spinner" aria-hidden="true"></span>
+            </button>
+        </form>
+        <p class="form-foot">{% if request.LANGUAGE_CODE == 'en' %}Already have an account? <a href="{% url 'login' %}">Sign in</a>{% else %}มีบัญชีแล้ว? <a href="{% url 'login' %}">เข้าสู่ระบบ</a>{% endif %}</p>
+    </div>
+</section>
+{% endblock %}

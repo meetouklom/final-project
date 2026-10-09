@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{% if request.LANGUAGE_CODE == 'en' %}Delete account · DormFix{% else %}ลบบัญชี · DormFix{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="form-page">
+    <a class="back-link detail-back-link" href="{% url 'account_settings' %}"><span aria-hidden="true">←</span>{% if request.LANGUAGE_CODE == 'en' %}Back to account settings{% else %}กลับไปตั้งค่าบัญชี{% endif %}</a>
+
+    <div class="form-card wide">
+        <h2>{% if request.LANGUAGE_CODE == 'en' %}Delete your account{% else %}ลบบัญชีของคุณ{% endif %}</h2>
+        <p class="muted">
+            {% if request.LANGUAGE_CODE == 'en' %}
+            This action is permanent. Please enter your password to confirm.
+            {% else %}
+            การกระทำนี้จะลบข้อมูลบัญชีของคุณอย่างถาวร กรุณากรอกรหัสผ่านเพื่อยืนยัน
+            {% endif %}
+        </p>
+
+        {% if error %}
+        <div class="error-box">{{ error }}</div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <label>
+                {% if request.LANGUAGE_CODE == 'en' %}Password{% else %}รหัสผ่าน{% endif %}
+                <input type="password" name="password" required autocomplete="current-password">
+            </label>
+
+            <button class="primary-button" type="submit">
+                {% if request.LANGUAGE_CODE == 'en' %}Delete account{% else %}ลบบัญชี{% endif %}
+            </button>
+        </form>
+    </div>
+</section>
+{% endblock %}

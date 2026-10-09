@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{% if request.LANGUAGE_CODE == 'en' %}Sign in · DormFix{% else %}เข้าสู่ระบบ · DormFix{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="auth-layout">
+    <div class="auth-intro">
+        <span class="eyebrow">DORMFIX / 01</span>
+        {% if request.LANGUAGE_CODE == 'en' %}
+        <h1>Make your room<br><em>work better.</em></h1>
+        <p>Report issues in your dorm, track every step, and get back to daily life with less stress.</p>
+        {% else %}
+        <h1>จัดการเรื่องห้อง<br><em>ให้ดียิ่งขึ้น</em></h1>
+        <p>แจ้งปัญหาภายในหอพัก ติดตามทุกขั้นตอน และกลับมาใช้ชีวิตได้อย่างสบายใจ</p>
+        {% endif %}
+    </div>
+    <div class="form-card login-card">
+        <h2>{% if request.LANGUAGE_CODE == 'en' %}Welcome back{% else %}ยินดีต้อนรับกลับ{% endif %}</h2>
+        <p class="muted">{% if request.LANGUAGE_CODE == 'en' %}Sign in to manage your repair requests.{% else %}เข้าสู่ระบบเพื่อติดตามรายการแจ้งซ่อมของคุณ{% endif %}</p>
+        {% if form.errors %}
+        <div class="error-box">{% if request.LANGUAGE_CODE == 'en' %}Incorrect username or password.{% else %}ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง{% endif %}</div>
+        {% endif %}
+        <form method="post" class="login-form" data-auth-form>
+            {% csrf_token %}
+            {% for field in form %}
+            <label class="auth-field">
+                {{ field.label }}{{ field }}
+                {% if field.errors %}<small class="field-error">{{ field.errors|striptags }}</small>{% endif %}
+            </label>
+            {% endfor %}
+            <button class="primary-button auth-submit-button" type="submit"
+                data-loading-label="{% if request.LANGUAGE_CODE == 'en' %}Signing in...{% else %}กำลังเข้าสู่ระบบ...{% endif %}">
+                <span class="auth-submit-label">{% if request.LANGUAGE_CODE == 'en' %}Sign in{% else %}เข้าสู่ระบบ{% endif %}</span>
+                <span class="auth-submit-arrow" aria-hidden="true">→</span>
+                <span class="auth-submit-spinner" aria-hidden="true"></span>
+            </button>
+        </form>
+        <p class="form-foot">{% if request.LANGUAGE_CODE == 'en' %}No account yet? <a href="{% url 'register' %}">Create account</a>{% else %}ยังไม่มีบัญชี? <a href="{% url 'register' %}">สมัครสมาชิก</a>{% endif %}</p>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,50 @@
+<article class="resident-account-row" id="account-{{ account.pk }}">
+    <span class="resident-account-avatar" aria-hidden="true">{{ account.get_full_name|default:account.username|slice:':1'|upper }}</span>
+    <div class="resident-account-identity">
+        <strong>{{ account.get_full_name|default:account.username }}</strong>
+        <span>{{ account.username }} · {% if account.is_superuser or account.is_staff %}{% if request.LANGUAGE_CODE == 'en' %}Django administrator{% else %}ผู้ดูแลระบบ Django{% endif %}{% elif account.is_supervisor %}{% if request.LANGUAGE_CODE == 'en' %}Dormitory supervisor{% else %}ผู้ดูแลหอพัก{% endif %}{% else %}{% if request.LANGUAGE_CODE == 'en' %}Resident{% else %}ผู้พักอาศัย{% endif %}{% endif %}</span>
+    </div>
+    <span class="resident-account-email">{{ account.email|default:'' }}</span>
+    <span class="account-status-badge{% if not account.is_active %} is-inactive{% endif %}">
+        {% if account.is_active %}{% if request.LANGUAGE_CODE == 'en' %}Active{% else %}ใช้งาน{% endif %}{% else %}{% if request.LANGUAGE_CODE == 'en' %}Inactive{% else %}ปิดใช้งาน{% endif %}{% endif %}
+    </span>
+    {% if account.is_staff or account.is_superuser %}
+    <a class="account-admin-link" href="{% url 'admin:accounts_user_change' account.pk %}">
+        {% if request.LANGUAGE_CODE == 'en' %}Django Admin{% else %}จัดการใน Django Admin{% endif %}
+    </a>
+    {% else %}
+    {% if account.pk == request.user.pk %}
+    <span class="resident-self-label">{% if request.LANGUAGE_CODE == 'en' %}You{% else %}บัญชีของคุณ{% endif %}</span>
+    {% else %}
+    <form class="account-role-form" method="post" action="{% url 'update_account_role' account.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="return_query" value="{{ filter_query }}">
+        <label class="visually-hidden" for="account-role-{{ account.pk }}">{% if request.LANGUAGE_CODE == 'en' %}Account role for {{ account.username }}{% else %}บทบาทบัญชีของ {{ account.username }}{% endif %}</label>
+        <select id="account-role-{{ account.pk }}" name="role">
+            <option value="student"{% if not account.is_supervisor %} selected{% endif %}>{% if request.LANGUAGE_CODE == 'en' %}Resident{% else %}ผู้พักอาศัย{% endif %}</option>
+            <option value="supervisor"{% if account.is_supervisor %} selected{% endif %}>{% if request.LANGUAGE_CODE == 'en' %}Dormitory supervisor{% else %}ผู้ดูแลหอพัก{% endif %}</option>
+        </select>
+        <button class="resident-role-save" type="submit">{% if request.LANGUAGE_CODE == 'en' %}Save role{% else %}บันทึกบทบาท{% endif %}</button>
+    </form>
+    {% endif %}
+    {% if account.role == 'student' and account.email and account.is_active %}
+    <form method="post" action="{% url 'send_account_password_reset' account.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="return_query" value="{{ filter_query }}">
+        <button class="resident-reset-button" type="submit">
+            <span aria-hidden="true">↗</span>{% if request.LANGUAGE_CODE == 'en' %}Send reset link{% else %}ส่งลิงก์รีเซ็ต{% endif %}
+        </button>
+    </form>
+    {% elif account.role == 'student' and not account.email %}
+    <span class="resident-no-email">{% if request.LANGUAGE_CODE == 'en' %}No email{% else %}ไม่มีอีเมล{% endif %}</span>
+    {% endif %}
+    <form class="account-status-form"{% if account.is_active %} data-confirm-deactivation-form data-account-name="{{ account.username }}"{% endif %} method="post" action="{% url 'update_account_status' account.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="return_query" value="{{ filter_query }}">
+        <input type="hidden" name="is_active" value="{% if account.is_active %}false{% else %}true{% endif %}">
+        <button class="account-status-button{% if account.is_active %} deactivate{% else %} activate{% endif %}" type="submit">
+            {% if account.is_active %}{% if request.LANGUAGE_CODE == 'en' %}Deactivate{% else %}ปิดใช้งาน{% endif %}{% else %}{% if request.LANGUAGE_CODE == 'en' %}Activate{% else %}เปิดใช้งาน{% endif %}{% endif %}
+        </button>
+    </form>
+    {% endif %}
+</article>
